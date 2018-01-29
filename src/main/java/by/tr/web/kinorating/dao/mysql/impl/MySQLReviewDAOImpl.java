@@ -25,6 +25,8 @@ import by.tr.web.kinorating.domain.User;
 
 public class MySQLReviewDAOImpl implements ReviewDAO {
 
+	private static final String SELECT_COUNT_FROM_REVIEWS = "SELECT COUNT(*) FROM reviews";
+	private static final String SELECT_PART_REVIEWS_QUERY = "SELECT mov_id, rev_review, rev_date, us_login, rev_id FROM reviews JOIN users ON reviews.us_id=users.us_id LIMIT ?, ?";
 	private static final String DELETE_REVIEW_QUERY = "DELETE FROM reviews WHERE us_id IN (SELECT us_id FROM users WHERE us_login=?) AND mov_id=?";
 	private static final String UPDATE_REVIEW_TEXT_QUERY = "UPDATE reviews SET rev_review=? WHERE us_id IN (SELECT us_id FROM users WHERE us_login=?) AND mov_id=?";
 	private static final String SELECT_ALL_REVIEWS_QUERY = "SELECT mov_id, rev_review, rev_date, us_login, rev_id FROM reviews JOIN users ON reviews.us_id=users.us_id";
@@ -201,7 +203,7 @@ public class MySQLReviewDAOImpl implements ReviewDAO {
 			while (resultSet.next()) {
 				review.setId(resultSet.getInt(1));
 				int movieID = resultSet.getInt(3);
-				Movie movie = movieDAO.readMovieById(movieID);
+				Movie movie = movieDAO.readMovieById(movieID, null);
 				review.setReviewedMovie(movie);
 				review.setAuthor(user);
 				review.setTextReview(resultSet.getString(4));
@@ -309,7 +311,7 @@ public class MySQLReviewDAOImpl implements ReviewDAO {
 			MovieDAO movieDAO = factory.getMovieDAO();
 			while (resultSet.next()) {
 				int movieID = resultSet.getInt(1);
-				Movie movie = movieDAO.readMovieById(movieID);
+				Movie movie = movieDAO.readMovieById(movieID, null);
 				review.setReviewedMovie(movie);
 				review.setTextReview(resultSet.getString(2));
 				java.util.Date date = new java.util.Date(resultSet.getDate(3).getTime());
@@ -347,6 +349,107 @@ public class MySQLReviewDAOImpl implements ReviewDAO {
 			}
 		}
 		return reviews;
+	}
+
+	@Override
+	public List<Review> readPartOfReviews(int start, int amount) throws DAOException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		List<Review> reviews = new ArrayList<Review>();
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.prepareStatement(SELECT_PART_REVIEWS_QUERY);
+			statement.setInt(1, start);
+			statement.setInt(2, amount);
+			resultSet = statement.executeQuery();
+			Review review = new Review();
+			DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+			UserDAO userDAO = factory.getUserDAO();
+			MovieDAO movieDAO = factory.getMovieDAO();
+			while (resultSet.next()) {
+				int movieID = resultSet.getInt(1);
+				Movie movie = movieDAO.readMovieById(movieID, null);
+				review.setReviewedMovie(movie);
+				review.setTextReview(resultSet.getString(2));
+				java.util.Date date = new java.util.Date(resultSet.getDate(3).getTime());
+				review.setAdditionDate(date);
+				User user = userDAO.readUserByLogin(resultSet.getString(4));
+				review.setId(resultSet.getInt(5));
+				review.setAuthor(user);
+				reviews.add(review);
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);
+			}
+		}
+		return reviews;
+	}
+
+	@Override
+	public int countReviewsAmount() throws DAOException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		int amount = 0;
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.prepareStatement(SELECT_COUNT_FROM_REVIEWS);
+			resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				amount = resultSet.getInt(1);
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);
+			}
+		}
+		return amount;
 	}
 
 	@Override

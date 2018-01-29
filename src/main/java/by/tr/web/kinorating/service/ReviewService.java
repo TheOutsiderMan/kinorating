@@ -11,6 +11,10 @@ public interface ReviewService {
 	
 	List<Review> showAllReviews() throws ServiceException;
 	
+	List<Review> getPartOfReviews(int start, int amount) throws ServiceException;
+	
+	int getReviewsAmount() throws ServiceException;
+	
 	List<Review> showUserReview(String login) throws ServiceException;
 	
 	List<Review> showMovieReviws(int movieID) throws ServiceException;

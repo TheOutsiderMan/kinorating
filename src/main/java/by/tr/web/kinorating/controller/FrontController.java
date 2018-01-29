@@ -14,10 +14,11 @@ import org.xml.sax.SAXException;
 import by.tr.web.kinorating.controller.command.Command;
 import by.tr.web.kinorating.controller.command.CommandProvider;
 import by.tr.web.kinorating.service.exception.ServiceException;
-import by.tr.web.kinorating.service.util.ConnectionPoolInitializer;
+import by.tr.web.kinorating.service.util.ConnectionPoolManager;
 
 public class FrontController extends HttpServlet {
 
+	private static final String MAIN_PAGE = "index.jsp";
 	private static final String PROBLEM_WITH_INITIALISING_APPROPRIATE_COMMAND_CLASS = "Problem with initialising appropriate command class";
 	private static final String PROBLEM_WITH_PARSING_COMMANDS = "Problem with parsing commands.xml";
 	private static final String PROBLEM_WITH_CLOSING_CONNECTIONS_TO_DB = "Problem with closing connections to DB";
@@ -37,7 +38,7 @@ public class FrontController extends HttpServlet {
 	public void init() throws ServletException {
 		super.init();
 		try {
-			ConnectionPoolInitializer.getInitializer().initializeConnectionPool();
+			ConnectionPoolManager.getInitializer().initializeConnectionPool();
 		} catch (ServiceException e) {
 			logger.error(PROBLEM_WITH_INITIALIZING_CONNECTION_POOL, e);
 		}
@@ -47,7 +48,7 @@ public class FrontController extends HttpServlet {
 	public void destroy() {
 		super.destroy();
 		try {
-			ConnectionPoolInitializer.getInitializer().closeAllConnections();
+			ConnectionPoolManager.getInitializer().closeAllConnections();
 		} catch (ServiceException e) {
 			logger.error(PROBLEM_WITH_CLOSING_CONNECTIONS_TO_DB, e);
 		}
@@ -58,6 +59,10 @@ public class FrontController extends HttpServlet {
 		Command command = null;
 		try {
 			command = provider.takeCommand(commandName);
+			if (command == null) {
+				request.getRequestDispatcher(MAIN_PAGE).forward(request, response);
+				return;
+			}
 			command.execute(request, response);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			logger.error(PROBLEM_WITH_INITIALISING_APPROPRIATE_COMMAND_CLASS, e);
@@ -68,12 +73,15 @@ public class FrontController extends HttpServlet {
 		}
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)	throws ServletException, IOException {
 		String commandName = request.getParameter(ParameterName.ACTION);
 		Command command = null;
 		try {
 			command = provider.takeCommand(commandName);
+			if (command == null) {
+				request.getRequestDispatcher(MAIN_PAGE).forward(request, response);
+				return;
+			}
 			command.execute(request, response);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			logger.error(PROBLEM_WITH_INITIALISING_APPROPRIATE_COMMAND_CLASS, e);

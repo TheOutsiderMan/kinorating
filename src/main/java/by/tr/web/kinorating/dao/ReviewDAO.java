@@ -19,6 +19,10 @@ public interface ReviewDAO {
 	
 	List<Review> readAllReviews() throws DAOException;
 	
+	List<Review> readPartOfReviews(int start, int amount) throws DAOException;
+	
+	int countReviewsAmount() throws DAOException;
+	
 	boolean updateReview(Review review, String newText) throws DAOException;
 
 	boolean deleteReview(Review review) throws DAOException;

@@ -23,5 +23,18 @@ public class CommonValidator {
 		}
 		return true;
 	}
-
+	
+	public static boolean validateStartIndexInRange(int start, int totalAmount) {
+		if (start < 0 || start > totalAmount) {
+			return false;
+		}
+		return true;		
+	}
+	
+	public static boolean validateAmount(int amount) {
+		if (amount <= 0) {
+			return false;
+		}
+		return true;
+	}
 }

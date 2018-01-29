@@ -1,5 +1,6 @@
 package by.tr.web.kinorating.service.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import by.tr.web.kinorating.domain.Status;
 import by.tr.web.kinorating.domain.User;
 import by.tr.web.kinorating.service.UserService;
 import by.tr.web.kinorating.service.exception.ServiceException;
+import by.tr.web.kinorating.service.validation.CommonValidator;
 import by.tr.web.kinorating.service.validation.MovieValidator;
 import by.tr.web.kinorating.service.validation.UserValidator;
 
@@ -40,17 +42,29 @@ public class UserServiceImpl implements UserService {
 	private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
 	
 	@Override
-	public List<User> showAllUsers() throws ServiceException {
-		List<User> users;
+	public boolean registerUser(String login, String email, String password) throws ServiceException {
+		if (!UserValidator.validateLoginEmailPassword(login, email, password)) {
+			return false;
+		}
+		User user = new User();
+		user.setEmail(email);
+		user.setLogin(login);
+		user.setPassword(password);
+		user.setRating(DEFAULT_RATING);
+		Date registrationDate = new Date();
+		user.setRegistrationDate(registrationDate);
+		user.setStatus(Status.ALLOWED);
+		user.setRole(Role.USER);
 		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
 		UserDAO userDAO = factory.getUserDAO();
+		boolean registered = false;
 		try {
-			users = userDAO.readAllUsers();
+			registered = userDAO.createUser(user);
 		} catch (DAOException e) {
-			logger.error(PROBLEM_WITH_GETTING_ALL_USERS, e);
-			throw new ServiceException(PROBLEM_WITH_GETTING_ALL_USERS, e);
+			logger.error(PROBLEM_WITH_REGISTRATION_USER, e);
+			throw new ServiceException(PROBLEM_WITH_REGISTRATION_USER, e);
 		}
-		return users;
+		return registered;
 	}
 
 	@Override
@@ -101,37 +115,57 @@ public class UserServiceImpl implements UserService {
 		return existedUser;
 	}
 
+	@Override
+	public List<User> showAllUsers() throws ServiceException {
+		List<User> users;
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		UserDAO userDAO = factory.getUserDAO();
+		try {
+			users = userDAO.readAllUsers();
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_GETTING_ALL_USERS, e);
+			throw new ServiceException(PROBLEM_WITH_GETTING_ALL_USERS, e);
+		}
+		return users;
+	}
+
+	@Override
+	public List<User> getPartOfUsers(int start, int amount) throws ServiceException {
+		int totalAmount = getUsersAmount();
+		if (!CommonValidator.validateAmount(amount) || !CommonValidator.validateStartIndexInRange(start, totalAmount)) {
+			return Collections.emptyList();
+		}
+		List<User> users;
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		UserDAO userDAO = factory.getUserDAO();
+		try {
+			users = userDAO.readPartOfUsers(start, amount);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_GETTING_ALL_USERS, e);
+			throw new ServiceException(PROBLEM_WITH_GETTING_ALL_USERS, e);
+		}
+		return users;
+	}
+
+	@Override
+	public int getUsersAmount() throws ServiceException {
+		int amount = 0;
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		UserDAO userDAO = factory.getUserDAO();
+		try {
+			amount = userDAO.countUsersAmount();
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_GETTING_ALL_USERS, e);
+			throw new ServiceException(PROBLEM_WITH_GETTING_ALL_USERS, e);
+		}
+		return amount;
+	}
+
 	private boolean isBannedUser(Status status) {
 		if (status == null || status.equals(Status.BANNED)) {
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public boolean registerUser(String login, String email, String password) throws ServiceException {
-		if (!UserValidator.validateLoginEmailPassword(login, email, password)) {
-			return false;
-		}
-		User user = new User();
-		user.setEmail(email);
-		user.setLogin(login);
-		user.setPassword(password);
-		user.setRating(DEFAULT_RATING);
-		Date registrationDate = new Date();
-		user.setRegistrationDate(registrationDate);
-		user.setStatus(Status.ALLOWED);
-		user.setRole(Role.USER);
-		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
-		UserDAO userDAO = factory.getUserDAO();
-		boolean registered = false;
-		try {
-			registered = userDAO.createUser(user);
-		} catch (DAOException e) {
-			logger.error(PROBLEM_WITH_REGISTRATION_USER, e);
-			throw new ServiceException(PROBLEM_WITH_REGISTRATION_USER, e);
-		}
-		return registered;
 	}
 
 	@Override
@@ -173,7 +207,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean changeRating(String login, double rating) throws ServiceException {
+	public boolean changeRating(String login, int rating) throws ServiceException {
 		if (!UserValidator.validateLogin(login) || !UserValidator.validateRating(rating)) {
 			return false;
 		}
@@ -192,7 +226,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean changeUserMarkToMovie(String login, int movieID, int newMark) throws ServiceException {
+	public boolean changeUserMarkToMovie(String login, int movieID, int newMark, String locale) throws ServiceException {
 		if (!UserValidator.validateLogin(login)) {
 			return false;
 		}
@@ -208,29 +242,33 @@ public class UserServiceImpl implements UserService {
 			logger.error(PROBLEM_WITH_READING_USER, e);
 			throw new ServiceException(PROBLEM_WITH_READING_USER, e);
 		}
+		if (user == null || user.getLogin() == null) {
+			return false;
+		}
 		MovieDAO movieDAO = factory.getMovieDAO();
 		Movie movie = null;
 		try {
-			movie = movieDAO.readMovieById(movieID);
+			movie = movieDAO.readMovieById(movieID, locale);
 		} catch (DAOException e1) {
 			logger.error(PROBLEM_WITH_READING_MOVIE, e1);
 			throw new ServiceException(PROBLEM_WITH_READING_MOVIE, e1);
 		}
-		if ((user == null) || (movie == null)) {
-			return false;
-		}
-		if ((user.getLogin() == null) || (movie.getTitle() == null)) {
+		if (movie == null || movie.getTitle() == null) {
 			return false;
 		}
 		double movieRating = movie.getRating();
 		double difference = Math.abs(movieRating - newMark);
+		int newRating = 0;
 		if (difference > MAX_DIFF_RATING_AND_MARK && movie.getVoteAmount() != 0) {
-			try {
-				userDAO.updateUserRating(user, user.getRating() - STEP_TO_CHANGE_USER_RATING);
-			} catch (DAOException e2) {
-				logger.error(PROBLEM_WITH_UPDATING_USER_RATING, e2);
-				throw new ServiceException(PROBLEM_WITH_UPDATING_USER_RATING, e2);
-			}
+			newRating = user.getRating() - STEP_TO_CHANGE_USER_RATING;
+		} else {
+			newRating = user.getRating() + STEP_TO_CHANGE_USER_RATING;
+		}
+		try {
+			userDAO.updateUserRating(user, newRating);
+		} catch (DAOException e2) {
+			logger.error(PROBLEM_WITH_UPDATING_USER_RATING, e2);
+			throw new ServiceException(PROBLEM_WITH_UPDATING_USER_RATING, e2);
 		}
 		boolean changed = false;
 		try {

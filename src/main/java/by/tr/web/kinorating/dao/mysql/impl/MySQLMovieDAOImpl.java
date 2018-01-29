@@ -23,17 +23,19 @@ import by.tr.web.kinorating.domain.Movie;
 
 public class MySQLMovieDAOImpl implements MovieDAO{
 
+	private static final String COUNT_MOVIES_ONE_LANGUAGE_QUERY = "SELECT COUNT(*) FROM movies_translate WHERE lang_short_name=?";
+	private static final String SELECT_PART_OF_MOVIES = "SELECT movies.mov_id, mov_title, mov_director, mov_genre, mov_release_year, mov_length, mov_rating, mov_addition_date, mov_mark_amount FROM movies_translate JOIN movies ON movies_translate.mov_id=movies.mov_id WHERE lang_short_name=? LIMIT ?,?";
 	private static final String UPDATE_MOVIE_MARKS_AMOUNT = "UPDATE movies SET mov_mark_amount=(SELECT COUNT(*) FROM user_marks WHERE movie_id=?) WHERE mov_id=?";
-	private static final String SELECT_MOVIE_BY_ID_QUERY = "SELECT * FROM movies_translate JOIN movies ON movies_translate.mov_id=movies.mov_id WHERE movies_translate.mov_id=?";
+	private static final String SELECT_MOVIE_BY_ID_QUERY = "SELECT * FROM movies_translate JOIN movies ON movies_translate.mov_id=movies.mov_id WHERE movies_translate.mov_id=? AND lang_short_name=?";
 	private static final String SELECT_MOVIE_BY_TITLE_QUERY = "SELECT mov_title, mov_director, mov_genre, mov_release_year, mov_length, mov_rating, mov_addition_date, movies_translate.mov_id, lang_short_name, mov_mark_amount FROM movies_translate JOIN movies ON movies_translate.mov_id=movies.mov_id WHERE mov_title=?";
 	private static final String SELECT_RANDOM_MOVIES_QUERY = "SELECT movies_translate.mov_id, mov_title, mov_director, mov_genre, mov_release_year, mov_length, mov_rating, mov_addition_date, mov_mark_amount FROM movies_translate JOIN movies ON movies_translate.mov_id=movies.mov_id WHERE lang_short_name=? ORDER BY RAND() LIMIT ?";
 	private static final String SELECT_ALL_MOVIES_ONE_TRANSLATION_QUERY = "SELECT movies_translate.mov_id, mov_title, mov_director, mov_genre, mov_release_year, mov_length, mov_rating, mov_addition_date, mov_mark_amount FROM movies_translate JOIN movies ON movies_translate.mov_id=movies.mov_id WHERE lang_short_name=?";
 	private static final String UPDATE_MOVIE_RATING_QUERY = "UPDATE movies SET mov_rating=(SELECT AVG(user_mark) FROM user_marks WHERE movie_id=?) WHERE mov_id=?";
-	private static final String UPDATE_MOVIE_GENRE_QUERY = "UPDATE movies_translate SET mov_genre=? WHERE mov_id=?";
-	private static final String UPDATE_MOVIE_DIRECTOR_QUERY = "UPDATE movies_translate SET mov_director=? WHERE mov_id=?";
+	private static final String UPDATE_MOVIE_GENRE_QUERY = "UPDATE movies_translate SET mov_genre=? WHERE mov_id=? AND lang_short_name=?";
+	private static final String UPDATE_MOVIE_DIRECTOR_QUERY = "UPDATE movies_translate SET mov_director=? WHERE mov_id=? AND lang_short_name=?";
 	private static final String UPDATE_MOVIE_YEAR_QUERY = "UPDATE movies SET mov_release_year=? WHERE mov_id=?";
 	private static final String UPDATE_MOVIE_LENGTH_QUERY = "UPDATE movies SET mov_length=? WHERE mov_id=?";
-	private static final String UPDATE_MOVIE_TITLE_QUERY = "UPDATE movies_translate SET mov_title=? WHERE mov_id=?";
+	private static final String UPDATE_MOVIE_TITLE_QUERY = "UPDATE movies_translate SET mov_title=? WHERE mov_id=? AND lang_short_name=?";
 	private static final String INSERT_TRANSLATION_QUERY = "INSERT INTO movies_translate (lang_short_name, mov_title, mov_director, mov_genre) VALUES (?, ?, ?, ?) WHERE mov_id=?";
 	private static final String CREATE_MOVIE_TRANSLATE_QUERY = "INSERT INTO movies_translate (mov_id, lang_short_name, mov_title, mov_director, mov_genre) VALUES (?, ?, ?, ?, ?)";
 	private static final String CREATE_MOVIE_QUERY = "INSERT INTO movies (mov_release_year, mov_length, mov_rating, mov_addition_date, mov_mark_amount) VALUES (?, ?, ?, ?, ?)";
@@ -243,6 +245,67 @@ public class MySQLMovieDAOImpl implements MovieDAO{
 	}
 
 	@Override
+	public List<Movie> readPartOfMovies(String locale, int start, int amount) throws DAOException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		List<Movie> movies = new ArrayList<Movie>();
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.prepareStatement(SELECT_PART_OF_MOVIES);
+			statement.setString(1, locale);
+			statement.setInt(2, start);
+			statement.setInt(3, amount);
+			resultSet = statement.executeQuery();
+			DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+			ActorDAO actorDAO = factory.getActorDAO();
+			while (resultSet.next()) {
+				Movie movie = new Movie();
+				movie.setId(resultSet.getInt(1));
+				movie.setTitle(resultSet.getString(2));
+				movie.setDirector(resultSet.getString(3));
+				movie.setGenre(resultSet.getString(4));
+				movie.setYear(resultSet.getInt(5));
+				movie.setLength(resultSet.getInt(6));
+				movie.setRating(resultSet.getDouble(7));
+				java.util.Date date =  new java.util.Date(resultSet.getDate(8).getTime());
+				movie.setAdditionDate(date);
+				movie.setVoteAmount(resultSet.getInt(9));
+				List<Actor> actors =  actorDAO.readActorsFromOneMovie(movie.getId(), locale);
+				movie.setActors(actors);
+				movies.add(movie);
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);				
+			}
+		}
+		return movies;
+	}
+
+	@Override
 	public List<Movie> readMovieByTitle(String title) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
@@ -302,7 +365,7 @@ public class MySQLMovieDAOImpl implements MovieDAO{
 	}
 
 	@Override
-	public Movie readMovieById(int id) throws DAOException {
+	public Movie readMovieById(int id, String locale) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
@@ -311,12 +374,12 @@ public class MySQLMovieDAOImpl implements MovieDAO{
 			connection = ConnectionPool.getInstance().takeConnection();
 			statement = connection.prepareStatement(SELECT_MOVIE_BY_ID_QUERY);
 			statement.setInt(1, id);
+			statement.setString(2, locale);
 			resultSet = statement.executeQuery();
 			DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
 			ActorDAO actorDAO = factory.getActorDAO();
 			while (resultSet.next()) {
 				movie.setId(id);
-				String locale = resultSet.getString(2);
 				movie.setTitle(resultSet.getString(3));
 				movie.setDirector(resultSet.getString(4));
 				movie.setGenre(resultSet.getString(5));
@@ -419,7 +482,50 @@ public class MySQLMovieDAOImpl implements MovieDAO{
 	}
 
 	@Override
-	public boolean updateMovieTitle(Movie movie, String newTitle) throws DAOException {
+	public int countMoviesAmountOneLanguage(String locale) throws DAOException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		int amount = 0;
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.prepareStatement(COUNT_MOVIES_ONE_LANGUAGE_QUERY);
+			statement.setString(1, locale);
+			resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				amount = resultSet.getInt(1);
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					throw new DAOException(e);
+				}
+			}
+			if (connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);				
+			}
+		}
+		return amount;
+	}
+
+	@Override
+	public boolean updateMovieTitle(Movie movie, String newTitle, String locale) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
@@ -429,6 +535,7 @@ public class MySQLMovieDAOImpl implements MovieDAO{
 			statement = connection.prepareStatement(UPDATE_MOVIE_TITLE_QUERY);
 			statement.setString(1, newTitle);
 			statement.setInt(2, movie.getId());
+			statement.setString(3, locale);
 			rowCount = statement.executeUpdate();
 		} catch (InterruptedException e) {
 			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
@@ -557,7 +664,7 @@ public class MySQLMovieDAOImpl implements MovieDAO{
 	}
 
 	@Override
-	public boolean updateMovieDirector(Movie movie, String newDirector) throws DAOException {
+	public boolean updateMovieDirector(Movie movie, String newDirector, String locale) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
@@ -567,6 +674,7 @@ public class MySQLMovieDAOImpl implements MovieDAO{
 			statement = connection.prepareStatement(UPDATE_MOVIE_DIRECTOR_QUERY);
 			statement.setString(1, newDirector);
 			statement.setInt(2, movie.getId());
+			statement.setString(3, locale);
 			rowCount = statement.executeUpdate();
 		} catch (InterruptedException e) {
 			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
@@ -603,7 +711,7 @@ public class MySQLMovieDAOImpl implements MovieDAO{
 	}
 
 	@Override
-	public boolean updateMovieGenre(Movie movie, String newGenre) throws DAOException {
+	public boolean updateMovieGenre(Movie movie, String newGenre, String locale) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
@@ -613,6 +721,7 @@ public class MySQLMovieDAOImpl implements MovieDAO{
 			statement = connection.prepareStatement(UPDATE_MOVIE_GENRE_QUERY);
 			statement.setString(1, newGenre);
 			statement.setInt(2, movie.getId());
+			statement.setString(3, locale);
 			rowCount = statement.executeUpdate();
 		} catch (InterruptedException e) {
 			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);

@@ -2,10 +2,6 @@
 <commands xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns="http://www.tr.web.final.task" xsi:schemaLocation="http://www.tr.web.final.task commands.xsd">
 	<command>
-		<name>search</name>
-		<class>by.tr.web.kinorating.controller.command.impl.SearchImpl</class>
-	</command>
-	<command>
 		<name>authentication</name>
 		<class>by.tr.web.kinorating.controller.command.impl.AuthenticationImpl</class>
 	</command>
@@ -22,10 +18,6 @@
 		<class>by.tr.web.kinorating.controller.command.impl.LogOffImpl</class>
 	</command>
 	<command>
-		<name>init_view</name>
-		<class>by.tr.web.kinorating.controller.command.impl.PageViewInitialzeImpl</class>
-	</command>
-	<command>
 		<name>add_movie</name>
 		<class>by.tr.web.kinorating.controller.command.impl.AddMovieImpl</class>
 	</command>
@@ -36,5 +28,49 @@
 	<command>
 		<name>delete_user_mark</name>
 		<class>by.tr.web.kinorating.controller.command.impl.DeleteUserMarkImpl</class>
+	</command>
+	<command>
+		<name>show_main</name>
+		<class>by.tr.web.kinorating.controller.command.impl.MainPageInitImpl</class>
+	</command>
+	<command>
+		<name>show_movies</name>
+		<class>by.tr.web.kinorating.controller.command.impl.MoviesPageInitImpl</class>
+	</command>
+	<command>
+		<name>show_users</name>
+		<class>by.tr.web.kinorating.controller.command.impl.UsersPageInitImpl</class>
+	</command>
+	<command>
+		<name>show_reviews</name>
+		<class>by.tr.web.kinorating.controller.command.impl.ReviewsPageInitImpl</class>
+	</command>
+	<command>
+		<name>show_actors</name>
+		<class>by.tr.web.kinorating.controller.command.impl.ActorsPageInitImpl</class>
+	</command>
+	<command>
+		<name>show_actors_item</name>
+		<class>by.tr.web.kinorating.controller.command.impl.CertainActorPageInitImpl</class>
+	</command>
+	<command>
+		<name>show_movies_item</name>
+		<class>by.tr.web.kinorating.controller.command.impl.CertainMoviePageInitImpl</class>
+	</command>
+	<command>
+		<name>add_actor_init</name>
+		<class>by.tr.web.kinorating.controller.command.impl.AddActorInitImpl</class>
+	</command>
+	<command>
+		<name>add_actor</name>
+		<class>by.tr.web.kinorating.controller.command.impl.AddActorImpl</class>
+	</command>
+	<command>
+		<name>add_actor_translation</name>
+		<class>by.tr.web.kinorating.controller.command.impl.AddActorTranslationImpl</class>
+	</command>
+	<command>
+		<name>user_profile_init</name>
+		<class>by.tr.web.kinorating.controller.command.impl.UserProfileInit</class>
 	</command>
 </commands>

@@ -1,5 +1,5 @@
 $(function() {
-	$(".delete-movie").click(function(){
+	$(".delete-movie").click(function() {
 		var self = this;
 		var user = $(this).attr("data-user");
 		var movie = $(this).attr("data-movie");
@@ -7,29 +7,25 @@ $(function() {
 		var success = $(this).attr("data-success");
 		var page = $(this).attr("data-page");
 		$.ajax({
-			url: 'app',
-			type: 'post',
-			data: {
-				action: "delete_user_mark",
-				login: user,
-				movieID: movie,
-				page: page
+			url : 'app',
+			type : 'post',
+			dataType: 'html',
+			data : {
+				action : "delete_user_mark",
+				login : user,
+				movieID : movie,
+				page : page
 			},
-			success: function(){
-				self.after("<div class='alert alert-success alert-dismissible fade show movie-success' role='alert'>" + success + 
-        				"<button type='button' class='close' data-dismiss='alert' aria-label='Close'>" +
-        				"<span aria-hidden='true'>&times;</span>" +
-        				"</button>" +
-        				"</div>");
-			},
-			error: function() {
-				self.after("<div class='alert alert-warning alert-dismissible fade show movie-alert' role='alert'>" + error + 
-            				"<button type='button' class='close' data-dismiss='alert' aria-label='Close'>" +
-            				"<span aria-hidden='true'>&times;</span>" +
-            				"</button>" +
-            				"</div>");
-				}
 		})
 	});
-});
 
+	$('#pagination-holder').twbsPagination({
+		totalPages : $('#pagination-holder').attr("data-pages"),
+		startPage : $('#pagination-holder').attr("data-current"),
+		href : true,
+		prev: "&laquo;",
+		next: "&raquo;",
+		paginationClass: "pagination justify-content-center",
+		pageVariable: "page"
+	});
+});

@@ -12,7 +12,7 @@ public class User implements Serializable {
 	private String email;
 	private String password;
 	private Role role;
-	private double rating;
+	private int rating;
 	private Status status;
 	private Date registrationDate;
 	private Map<Integer, Integer> marks;
@@ -52,11 +52,11 @@ public class User implements Serializable {
 		this.role = role;
 	}
 
-	public double getRating() {
+	public int getRating() {
 		return rating;
 	}
 
-	public void setRating(double rating) {
+	public void setRating(int rating) {
 		this.rating = rating;
 	}
 

@@ -16,6 +16,7 @@ import by.tr.web.kinorating.domain.Review;
 import by.tr.web.kinorating.domain.User;
 import by.tr.web.kinorating.service.ReviewService;
 import by.tr.web.kinorating.service.exception.ServiceException;
+import by.tr.web.kinorating.service.validation.CommonValidator;
 import by.tr.web.kinorating.service.validation.MovieValidator;
 import by.tr.web.kinorating.service.validation.ReviewValidator;
 import by.tr.web.kinorating.service.validation.UserValidator;
@@ -71,6 +72,38 @@ public class ReviewServiceImpl implements ReviewService {
 			throw new ServiceException(PROBLEM_WITH_READING_REVIEWS, e);
 		}
 		return reviews;
+	}
+
+	@Override
+	public List<Review> getPartOfReviews(int start, int amount) throws ServiceException {
+		int totalAmount = getReviewsAmount();
+		if (!CommonValidator.validateAmount(amount) || !CommonValidator.validateStartIndexInRange(start, totalAmount)) {
+			return Collections.emptyList();
+		}
+		List<Review> reviews = null;
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		ReviewDAO reviewDAO = factory.getReviewDAO();
+		try {
+			reviews = reviewDAO.readPartOfReviews(start, amount);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_READING_REVIEWS, e);
+			throw new ServiceException(PROBLEM_WITH_READING_REVIEWS, e);
+		}
+		return reviews;
+	}
+
+	@Override
+	public int getReviewsAmount() throws ServiceException {
+		int amount = 0;
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		ReviewDAO reviewDAO = factory.getReviewDAO();
+		try {
+			amount = reviewDAO.countReviewsAmount();
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_READING_REVIEWS, e);
+			throw new ServiceException(PROBLEM_WITH_READING_REVIEWS, e);
+		}
+		return amount;
 	}
 
 	@Override

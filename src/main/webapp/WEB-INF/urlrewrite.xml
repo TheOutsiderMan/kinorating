@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 4.0//EN"
+        "http://www.tuckey.org/res/dtds/urlrewrite4.0.dtd">
+
+<urlrewrite>
+
+	<rule>
+		<from>^/(app|css|js|img|bootstrap|favicon)(.*)$</from>
+		<to last="true">/$1$2</to>
+	</rule>
+	<rule>
+		<from>^/(?!app|css|js|img|bootstrap|favicon)([a-zA-Z_-]+)/([0-9]+)$</from>
+		<to>/app?action=show_$1_item&amp;id=$2</to>
+	</rule>
+	<rule>
+		<from>^/actors/add-actor$</from>
+		<to>/app?action=add_actor_init</to>
+	</rule>
+	<rule>
+		<from>^/user/profile$</from>
+		<to>/app?action=user_profile_init</to>
+	</rule>
+	<rule>
+		<from>/(?!app|css|js|img|bootstrap|favicon)([a-zA-Z_-]+)\?(.+)$</from>
+		<to>/app?action=show_$1&amp;$2</to>
+	</rule>
+	<rule>
+		<from>^/(?!app|css|js|img|bootstrap|favicon)([a-zA-Z_-]+)$</from>
+		<to>/app?action=show_$1</to>
+	</rule>
+	<rule>
+		<from>^/(.+);jsessionid=(.+)</from>
+		<to>/$1</to>
+	</rule>
+</urlrewrite>

@@ -3,6 +3,7 @@ package by.tr.web.kinorating.service;
 import java.util.List;
 
 import by.tr.web.kinorating.domain.Actor;
+import by.tr.web.kinorating.domain.Movie;
 import by.tr.web.kinorating.service.exception.ServiceException;
 
 public interface ActorService {
@@ -12,12 +13,22 @@ public interface ActorService {
 	boolean addTranslation(Actor translation, String langName) throws ServiceException;
 	
 	List<Actor> getActorByName(String firstName, String secondName) throws ServiceException;
+	
+	Actor getActorById(int id, String langName) throws ServiceException;
 
 	List<Actor> getAllActors(String langName) throws ServiceException;
+	
+	List<Actor> getPartOfActors(String langName, int start, int amount) throws ServiceException;
+	
+	int getActorsAmountOneLanguage(String langName) throws ServiceException;
+	
+	List<Movie> getMoviesOneActor(int actorID, String langName) throws ServiceException;
+	
+	boolean editName(int actorID, String newFirstName, String newSecondName, String langName) throws ServiceException;
 
-	boolean editFirstName(int actorID, String newName) throws ServiceException;
+	boolean editFirstName(int actorID, String newName, String langName) throws ServiceException;
 
-	boolean editSecondName(int actorID, String newName) throws ServiceException;
+	boolean editSecondName(int actorID, String newName, String langName) throws ServiceException;
 
 	boolean editAge(int actorID, int age) throws ServiceException;
 

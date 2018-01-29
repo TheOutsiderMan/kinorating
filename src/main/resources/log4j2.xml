@@ -17,6 +17,9 @@
 		<Logger name="by.tr.web.kinorating.dao.connection_pool.ConnectionPool" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.ActorsPageInitImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
 		<Logger name="by.tr.web.kinorating.controller.command.impl.AddMovieImpl" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
@@ -26,13 +29,43 @@
 		<Logger name="by.tr.web.kinorating.controller.command.impl.DeleteUserMarkImpl" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.MainPageInitIImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.MoviesPageInitImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
 		<Logger name="by.tr.web.kinorating.controller.command.impl.RegistrationImpl" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
-		<Logger name="by.tr.web.kinorating.controller.command.impl.PageViewInitialzeImpl" level="info" additivity="false">
+		<Logger name="by.tr.web.kinorating.controller.command.impl.ReviewsPageInitImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.UsersPageInitImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.CertainActorPageInitImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.CertainMoviePageInitImpl" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
 		<Logger name="by.tr.web.kinorating.controller.command.impl.VoteImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.AddActorInitImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.AddActorImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.AddActorTranslationImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.AddMovieTranslationImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.controller.command.impl.UserProfileInit" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
 		<Logger name="by.tr.web.kinorating.dao.mysql.impl.MySQLUserDAOImpl" level="info" additivity="false">
@@ -47,17 +80,20 @@
 		<Logger name="by.tr.web.kinorating.dao.mysql.impl.MySQLMovieDAOImpl" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
-		<Logger name="by.tr.web.kinorating.service.impl.UserServiceImpl" level="warn" additivity="false">
+		<Logger name="by.tr.web.kinorating.service.impl.UserServiceImpl" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
-		<Logger name="by.tr.web.kinorating.service.impl.ReviewServiceImpl" level="warn" additivity="false">
+		<Logger name="by.tr.web.kinorating.service.impl.ReviewServiceImpl" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
-		<Logger name="by.tr.web.kinorating.service.impl.ActorServiceImpl" level="warn" additivity="false">
+		<Logger name="by.tr.web.kinorating.service.impl.ActorServiceImpl" level="info" additivity="false">
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="by.tr.web.kinorating.service.impl.MovieServiceImpl" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger>
 		<!-- 
-		<Logger name="" level="warn" additivity="false">
+		<Logger name="" level="info" additivity="false">
 			<AppenderRef ref="File" />
 		</Logger> -->
 		<Root level="info">

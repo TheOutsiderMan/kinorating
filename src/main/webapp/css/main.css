@@ -79,3 +79,17 @@ div.vote-result {
 	margin-top: 0.5rem;
 	padding-right: 2.25rem;
 }
+
+#pagination-holder {
+	margin-bottom: 0.5rem;
+	margin-top: 0.5rem;
+}
+
+#add-movie-btn {
+	margin-top: 0.5rem;
+}
+
+.main-page-h{
+	margin-bottom: .75rem;
+	margin-top: .75rem;
+}

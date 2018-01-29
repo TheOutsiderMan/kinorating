@@ -2,12 +2,12 @@ $(function() {
 	
 	$.rating = function(e, o) {
         this.options = $.extend({
-            image: '../img/stars.png',
+            image: 'img/stars.png',
             width: 32,
             stars: 10,
             minimal: 0,
             readOnly: false,
-            url: '',
+            url: 'app',
             type: 'post',
             auth: false,
             msgOK: '',
@@ -44,7 +44,6 @@ $(function() {
                 left = 0,
                 width = 0;
             this.vote_hover.on('mousemove mouseover', function(e) {
-                if (self.options.readOnly) return;
                 var $this = $(this),
                     mark = 0;
                 left = e.clientX > 0 ? e.clientX : e.pageX;
@@ -60,7 +59,9 @@ $(function() {
                     'background-position': '0 0'
                 });
             }).on('mouseout', function() {
-                if (self.options.readOnly) return;
+                if (self.options.readOnly) {
+                	self.set();
+                }
                 self.reset();
             }).on('click.rating', function() {
                 if (!self.options.auth) {
@@ -71,13 +72,12 @@ $(function() {
             				"</div>");
                 	return;
                 }
-            	if (self.options.readOnly) return;
                 var mark = Math.round(width / self.options.width * 10) / 10;
                 if (mark > self.options.stars) mark = self.options.stars;
                 if (mark < 0) mark = 0;
                 self.old = self.val;
                 self.val = (self.val * self.votes + mark) / (self.votes + 1);
-                self.val.toFixed(1);
+                self.val.toFixed(3);
                 if (self.options.url != '' && self.options.login != '') {
                     self.send(mark, self.options.login, self.options.movieID);
                 }
@@ -88,13 +88,19 @@ $(function() {
         set: function() {
             this.vote_active.css({
                 'width': this.val * this.options.width,
-                'background-position': '0 -96'
+                'background-position': '0 -64px'
             });
         },
         reset: function() {
             this.vote_active.css({
                 'width': this.old * this.options.width,
                 'background-position': '0 -64px'
+            });
+        },
+        applyVote: function(user_mark){
+        	this.vote_active.css({
+                'width': user_mark * this.options.width,
+                'background-position': '0 -96px'
             });
         },
         render: function() {
@@ -121,18 +127,19 @@ $(function() {
                 type: self.options.type,
                 data: {
                 	action: "vote",
-                    mark: self.options.mark,
-                    login: self.options.login,
-                    movieID: self.options.movieID
+                    mark: mark,
+                    login: login,
+                    movieID: movieID
                 },
-                dataType: 'json',
+                dataType: 'html',
                 success: function(data) {
-                    self.votes++;
+                	self.votes++;
                     $('#rating-movie-' + self.options.movieID).after("<div class='alert alert-success alert-dismissible fade show movie-success' role='alert'>" + self.options.msgOK +  
                     		"<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
-                    self.set();
+                    this.old = this.val;
+                    self.applyVote(mark);
                 },
-                error: function() {
+                error: function(data) {
                 	$('#rating-movie-' + self.options.movieID).after("<div class='alert alert-warning alert-dismissible fade show movie-alert' role='alert'>"+ self.options.errorMsg +"<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
                 	self.reset();
 				}

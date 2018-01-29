@@ -12,14 +12,20 @@ public interface MovieService {
 	boolean addTranslation(Movie translation, String langName) throws ServiceException;
 	
 	List<Movie> getAllMovies(String langName) throws ServiceException;
-
+	
+	Movie getMovieById(int id, String langName) throws ServiceException;
+	
+	List<Movie> getPartOfMovies(String langName, int start, int amount) throws ServiceException;
+	
 	List<Movie> getRandomMovies(int amount, String langName) throws ServiceException;
 	
-	boolean editMovieTitle(int movieID, String title) throws ServiceException;
+	int getMoviesAmountOneLanguage(String langName) throws ServiceException;
 	
-	boolean editMovieDirector(int movieID, String director) throws ServiceException;
+	boolean editMovieTitle(int movieID, String title, String langName) throws ServiceException;
 	
-	boolean editMovieGenre(int movieID, String genre) throws ServiceException;
+	boolean editMovieDirector(int movieID, String director, String langName) throws ServiceException;
+	
+	boolean editMovieGenre(int movieID, String genre, String langName) throws ServiceException;
 	
 	boolean editMovieLength(int movieID, int length) throws ServiceException;
 	

@@ -30,6 +30,8 @@ public class MySQLUserDAOImpl implements UserDAO {
 	
 	private static final String CREATE_USER_QUERY = "INSERT INTO users (us_login, us_password, us_email, us_role, us_status, us_rating, us_registration_date) VALUES(?, ?, ?, ?, ?, ?, ?)";
 	private static final String ADD_USER_MARK_TO_MOVIE_QUERY = "INSERT INTO user_marks (user_id, movie_id, user_mark) VALUES ((SELECT us_id FROM users WHERE us_login=?), ?, ?)";
+	private static final String SELECT_PART_OF_USERS_QUERY = "SELECT * FROM users LIMIT ?,?";
+	private static final String COUNT_USERS = "SELECT COUNT(*) FROM users";
 	private static final String SELECT_FROM_USERS_QUERY = "SELECT * FROM users";
 	private static final String SELECT_USER_MARK_TO_MOVIE_QUERy = "SELECT * FROM user_marks WHERE user_id=(SELECT us_id FROM users WHERE us_login=?) AND movie_id=?";
 	private static final String SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE us_email=?";
@@ -75,7 +77,7 @@ public class MySQLUserDAOImpl implements UserDAO {
 			preparedStatement.setString(3, email);
 			preparedStatement.setString(4, user.getRole().toString());
 			preparedStatement.setString(5, user.getStatus().toString());
-			preparedStatement.setDouble(6, user.getRating());
+			preparedStatement.setInt(6, user.getRating());
 			Date date = new Date(user.getRegistrationDate().getTime());
 			preparedStatement.setDate(7, date);
 			rowCount = preparedStatement.executeUpdate();
@@ -104,58 +106,6 @@ public class MySQLUserDAOImpl implements UserDAO {
 		return false;
 	}
 	
-	@Override
-	public List<User> readAllUsers() throws DAOException {
-		Connection connection = null;
-		Statement statement= null;
-		ResultSet resultSet = null;
-		List<User> users = new ArrayList<User>();
-		try {
-			connection = ConnectionPool.getInstance().takeConnection();
-			statement = connection.createStatement();
-			resultSet = statement.executeQuery(SELECT_FROM_USERS_QUERY);
-			while (resultSet.next()) {
-				User user = new User();
-				user.setLogin(resultSet.getString(2));
-				user.setPassword(resultSet.getString(3));
-				user.setEmail(resultSet.getString(4));
-				user.setRole(Role.valueOf(resultSet.getString(5)));
-				user.setStatus(Status.valueOf(resultSet.getString(6)));
-				user.setRating(resultSet.getDouble(7));
-				java.util.Date date = new java.util.Date(resultSet.getDate(8).getTime());
-				user.setRegistrationDate(date);
-				users.add(user);
-			}
-		} catch (InterruptedException e) {
-			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
-			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
-		} catch (SQLException e) {
-			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
-			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
-		} finally {
-			if(resultSet != null) {
-				try {
-					resultSet.close();
-				} catch (SQLException e) {
-					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
-					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
-				}
-			}
-			if (statement != null) {
-				try {
-					statement.close();
-				} catch (SQLException e) {
-					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
-					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
-				}
-			}
-			if(connection != null) {
-				ConnectionPool.getInstance().releaseConnection(connection);
-			}
-		}
-		return users;
-	}
-
 	private boolean isExistedUser(String string) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement= null;
@@ -198,6 +148,155 @@ public class MySQLUserDAOImpl implements UserDAO {
 		}
 		return false;
 	}
+
+	@Override
+	public List<User> readAllUsers() throws DAOException {
+		Connection connection = null;
+		Statement statement= null;
+		ResultSet resultSet = null;
+		List<User> users = new ArrayList<User>();
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(SELECT_FROM_USERS_QUERY);
+			while (resultSet.next()) {
+				User user = new User();
+				user.setLogin(resultSet.getString(2));
+				user.setPassword(resultSet.getString(3));
+				user.setEmail(resultSet.getString(4));
+				user.setRole(Role.valueOf(resultSet.getString(5)));
+				user.setStatus(Status.valueOf(resultSet.getString(6)));
+				user.setRating(resultSet.getInt(7));
+				java.util.Date date = new java.util.Date(resultSet.getDate(8).getTime());
+				user.setRegistrationDate(date);
+				users.add(user);
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if(resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if(connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);
+			}
+		}
+		return users;
+	}
+
+	@Override
+	public List<User> readPartOfUsers(int start, int amount) throws DAOException {
+		Connection connection = null;
+		PreparedStatement statement= null;
+		ResultSet resultSet = null;
+		List<User> users = new ArrayList<User>();
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.prepareStatement(SELECT_PART_OF_USERS_QUERY);
+			statement.setInt(1, start);
+			statement.setInt(2, amount);
+			resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				User user = new User();
+				user.setLogin(resultSet.getString(2));
+				user.setPassword(resultSet.getString(3));
+				user.setEmail(resultSet.getString(4));
+				user.setRole(Role.valueOf(resultSet.getString(5).toUpperCase()));
+				user.setStatus(Status.valueOf(resultSet.getString(6).toUpperCase()));
+				user.setRating(resultSet.getInt(7));
+				java.util.Date date = new java.util.Date(resultSet.getDate(8).getTime());
+				user.setRegistrationDate(date);
+				users.add(user);
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if(resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if(connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);
+			}
+		}
+		return users;
+	}
+
+	@Override
+	public int countUsersAmount() throws DAOException {
+		Connection connection = null;
+		PreparedStatement statement= null;
+		ResultSet resultSet = null;
+		int amount = 0;
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.prepareStatement(COUNT_USERS);
+			resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				amount = resultSet.getInt(1);
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if(resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if(connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);
+			}
+		}
+		return amount;
+	}
 	
 	@Override
 	public User readUserByLogin(String login) throws DAOException {
@@ -219,7 +318,7 @@ public class MySQLUserDAOImpl implements UserDAO {
 				user.setRole(Role.valueOf(role));
 				String status = resultSet.getString(6).toUpperCase();
 				user.setStatus(Status.valueOf(status));
-				user.setRating(resultSet.getDouble(7));
+				user.setRating(resultSet.getInt(7));
 				Date regDate = resultSet.getDate(8);
 				user.setRegistrationDate(new Date(regDate.getTime()));
 				Map<Integer, Integer> marks = getUserMarks(userID);
@@ -275,7 +374,7 @@ public class MySQLUserDAOImpl implements UserDAO {
 				user.setRole(Role.valueOf(role));
 				String status = resultSet.getString(6).toUpperCase();
 				user.setStatus(Status.valueOf(status));
-				user.setRating(resultSet.getDouble(7));
+				user.setRating(resultSet.getInt(7));
 				Date regDate = resultSet.getDate(8);
 				user.setRegistrationDate(new Date(regDate.getTime()));
 				Map<Integer, Integer> marks = getUserMarks(userID);
@@ -551,14 +650,14 @@ public class MySQLUserDAOImpl implements UserDAO {
 
 
 	@Override
-	public boolean updateUserRating(User user, double newRating) throws DAOException {
+	public boolean updateUserRating(User user, int newRating) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement= null;
 		int rowCount = 0;
 		try {
 			connection = ConnectionPool.getInstance().takeConnection();
 			statement = connection.prepareStatement(UPDATE_USER_RATING_QUERY);
-			statement.setDouble(1, newRating);
+			statement.setInt(1, newRating);
 			statement.setString(2, user.getLogin());
 			rowCount = statement.executeUpdate();
 		} catch (InterruptedException e) {

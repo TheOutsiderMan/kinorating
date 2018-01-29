@@ -48,7 +48,7 @@ public class ActorValidator {
 	}
 
 	public static boolean validateActorAge(int age) {
-		if (age <= 0) {
+		if (age < 0) {
 			return false;
 		}
 		return true;

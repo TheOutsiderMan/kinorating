@@ -12,7 +12,7 @@ import by.tr.web.kinorating.controller.command.Command;
 public class LogOffImpl implements Command {
 	
 	private static final String USER_ATTR = "user";
-	private static final String FORWARD_URL = "index.jsp";
+	private static final String FORWARD_URL = "main";
 	private static final String AUTHENTICATED = "authenticated";
 	private static final String AUTHENTICATED_FALSE = "no";
 	

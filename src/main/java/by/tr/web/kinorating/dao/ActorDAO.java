@@ -17,16 +17,22 @@ public interface ActorDAO {
 	List<Actor> readActorByName(String firstName, String secondName) throws DAOException;
 	
 	List<Actor> readAllActors(String locale) throws DAOException;
+	
+	List<Actor> readPartOfActors(String locale, int start, int amount) throws DAOException;
 
 	List<Actor> readActorsFromOneMovie(int movieID, String locale) throws DAOException;
+	
+	List<Movie> readMoviesOneActor(Actor actor, String locale) throws DAOException;
+	
+	int countActorsOneLanguage(String locale) throws DAOException;
 
 	boolean isExistedActor(Actor actor) throws DAOException;
 
-	boolean updateActorName(Actor actor, String firstName, String secondName) throws DAOException;
+	boolean updateActorName(Actor actor, String firstName, String secondName, String locale) throws DAOException;
 
-	boolean updateActorFirstName(Actor actor, String firstName) throws DAOException;
+	boolean updateActorFirstName(Actor actor, String firstName, String locale) throws DAOException;
 
-	boolean updateActorSecondName(Actor actor, String secondName) throws DAOException;
+	boolean updateActorSecondName(Actor actor, String secondName, String locale) throws DAOException;
 
 	boolean updateActorAge(Actor actor, int age) throws DAOException;
 

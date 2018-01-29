@@ -79,17 +79,11 @@ public class MovieValidator {
 		return true;
 	}
 
-	public static boolean validateAmountMovies(int amount) {
-		if (amount <= 0) {
-			return false;
-		}
-		return true;
-	}
-
 	public static boolean validateMovieLength(int length) {
 		if (length <= 0) {
 			return false;
 		}
 		return true;
 	}
+	
 }

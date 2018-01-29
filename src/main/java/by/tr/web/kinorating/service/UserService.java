@@ -13,13 +13,17 @@ public interface UserService {
 
 	boolean registerUser(String login, String email, String password) throws ServiceException;
 
+	List<User> getPartOfUsers(int start, int amount) throws ServiceException;
+
+	int getUsersAmount() throws ServiceException;
+
 	boolean banUser(String login) throws ServiceException;
 	
 	boolean unbanUser(String login) throws ServiceException;
 
-	boolean changeRating(String login, double rating) throws ServiceException;
+	boolean changeRating(String login, int rating) throws ServiceException;
 	
-	boolean changeUserMarkToMovie(String login, int movieID, int newMark) throws ServiceException;
+	boolean changeUserMarkToMovie(String login, int movieID, int newMark, String locale) throws ServiceException;
 	
 	boolean deleteUserMarkToMovie(String login, int movieID) throws ServiceException;
 	

@@ -18,6 +18,10 @@ public interface UserDAO {
 	
 	List<User> readAllUsers() throws DAOException;
 	
+	List<User> readPartOfUsers(int start, int amount) throws DAOException;
+
+	int countUsersAmount() throws DAOException;
+	
 	User checkUserWithLogin(User user) throws DAOException;
 	
 	User checkUserWithEmail(User user) throws DAOException;
@@ -30,7 +34,7 @@ public interface UserDAO {
 	
 	boolean updateUserStatus(User user, Status newStatus) throws DAOException;
 	
-	boolean updateUserRating(User user, double newRating) throws DAOException;
+	boolean updateUserRating(User user, int newRating) throws DAOException;
 	
 	boolean updateUserMarkToMovie(User user, Movie movie, int newMark) throws DAOException;
 	

@@ -19,6 +19,7 @@ import by.tr.web.kinorating.service.exception.ServiceException;
 public class DeleteUserMarkImpl implements Command{
 	
 	private static final String SESSION_ATTR_USER = "user";
+	private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=UTF-8";
 
 	private static final String PROBLEM_WITH_DELETING_USER_MARK_TO_MOVIE = "Problem with deleting user's mark to movie";
 	
@@ -49,7 +50,10 @@ public class DeleteUserMarkImpl implements Command{
 			User user = (User) request.getSession().getAttribute(SESSION_ATTR_USER);
 			user.getMarks().remove(movieID);
 			request.getSession().setAttribute(SESSION_ATTR_USER, user);
+			/*response.setStatus(HttpServletResponse.SC_OK);
+			response.setContentType(TEXT_HTML_CHARSET_UTF_8);*/
 			response.sendRedirect(redirectLocation);
+			return;
 		}
 	}
 	

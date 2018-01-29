@@ -20,6 +20,7 @@ import by.tr.web.kinorating.service.validation.MovieValidator;
 
 public class ActorServiceImpl implements ActorService {
 
+	private static final String PROBLEM_WITH_READING_MOVIES = "Problem with reading movies";
 	private static final String PROBLEM_WITH_ADDITION_ACTOR_TRANSLATION = "Problem with addition actor data translation";
 	private static final String PROBLEM_WITH_DELETING_ACTOR = "Problem with deleting actor";
 	private static final String PROBLEM_WITH_EDITING_ACTOR_DATA = "Problem with editing actor data";
@@ -88,6 +89,23 @@ public class ActorServiceImpl implements ActorService {
 	}
 
 	@Override
+	public Actor getActorById(int id, String langName) throws ServiceException {
+		if(!ActorValidator.validateActorID(id) || !CommonValidator.validateLanguageName(langName)) {
+			return new Actor();
+		}
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		ActorDAO actorDAO = factory.getActorDAO();
+		Actor actor;
+		try {
+			actor = actorDAO.readActorById(id, langName);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_READING_ACTORS, e);
+			throw new ServiceException(PROBLEM_WITH_READING_ACTORS, e);
+		}
+		return actor;
+	}
+
+	@Override
 	public List<Actor> getAllActors(String langName) throws ServiceException {
 		if (!CommonValidator.validateLanguageName(langName)) {
 			return Collections.emptyList();
@@ -105,8 +123,69 @@ public class ActorServiceImpl implements ActorService {
 	}
 
 	@Override
-	public boolean editFirstName(int actorID, String newName) throws ServiceException {
-		if (!ActorValidator.validateActorID(actorID) || !ActorValidator.validateActorFirstName(newName)) {
+	public List<Actor> getPartOfActors(String langName, int start, int amount) throws ServiceException {
+		if (!CommonValidator.validateLanguageName(langName) || !CommonValidator.validateAmount(amount)) {
+			return Collections.emptyList();
+		}
+		int totalAmount = getActorsAmountOneLanguage(langName);
+		if (!CommonValidator.validateStartIndexInRange(start, totalAmount)) {
+			return Collections.emptyList();
+		}
+		List<Actor> actors = null;
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		ActorDAO actorDAO = factory.getActorDAO();
+		try {
+			actors = actorDAO.readPartOfActors(langName, start, amount);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_READING_ACTORS, e);
+			throw new ServiceException(PROBLEM_WITH_READING_ACTORS, e);
+		}
+		return actors;
+	}
+
+	@Override
+	public int getActorsAmountOneLanguage(String langName) throws ServiceException {
+		int amount = 0;
+		if (!CommonValidator.validateLanguageName(langName)) {
+			return amount;
+		}
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		ActorDAO actorDAO = factory.getActorDAO();
+		try {
+			amount = actorDAO.countActorsOneLanguage(langName);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_READING_ACTORS, e);
+			throw new ServiceException(PROBLEM_WITH_READING_ACTORS, e);
+		}
+		return amount;
+	}
+	
+	@Override
+	public List<Movie> getMoviesOneActor(int actorID, String langName) throws ServiceException {
+		if(!ActorValidator.validateActorID(actorID) || !CommonValidator.validateLanguageName(langName)) {
+			return Collections.emptyList();
+		}
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		ActorDAO actorDAO = factory.getActorDAO();
+		List<Movie> movies = null;
+		Actor actor = new Actor();
+		actor.setId(actorID);
+		try {
+			movies = actorDAO.readMoviesOneActor(actor, langName);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_READING_MOVIES, e);
+			throw new ServiceException(PROBLEM_WITH_READING_MOVIES, e);
+		}
+		return movies;
+	}
+
+	@Override
+	public boolean editName(int actorID, String newFirstName, String newSecondName, String langName)
+			throws ServiceException {
+		if (!ActorValidator.validateActorID(actorID) || !ActorValidator.validateActorFirstName(newFirstName)) {
+			return false;
+		}
+		if (!CommonValidator.validateLanguageName(langName) || !ActorValidator.validateActorSecondName(newSecondName)) {
 			return false;
 		}
 		Actor actor = new Actor();
@@ -115,7 +194,7 @@ public class ActorServiceImpl implements ActorService {
 		ActorDAO actorDAO = factory.getActorDAO();
 		boolean updated = false;
 		try {
-			updated = actorDAO.updateActorFirstName(actor, newName);
+			updated = actorDAO.updateActorName(actor, newFirstName, newSecondName, langName);
 		} catch (DAOException e) {
 			logger.error(PROBLEM_WITH_EDITING_ACTOR_DATA, e);
 			throw new ServiceException(PROBLEM_WITH_EDITING_ACTOR_DATA, e);
@@ -124,8 +203,11 @@ public class ActorServiceImpl implements ActorService {
 	}
 
 	@Override
-	public boolean editSecondName(int actorID, String newName) throws ServiceException {
-		if (!ActorValidator.validateActorID(actorID) || !ActorValidator.validateActorSecondName(newName)) {
+	public boolean editFirstName(int actorID, String newName, String langName) throws ServiceException {
+		if (!ActorValidator.validateActorID(actorID) || !ActorValidator.validateActorFirstName(newName)) {
+			return false;
+		}
+		if (!CommonValidator.validateLanguageName(langName)) {
 			return false;
 		}
 		Actor actor = new Actor();
@@ -134,7 +216,29 @@ public class ActorServiceImpl implements ActorService {
 		ActorDAO actorDAO = factory.getActorDAO();
 		boolean updated = false;
 		try {
-			updated = actorDAO.updateActorFirstName(actor, newName);
+			updated = actorDAO.updateActorFirstName(actor, newName, langName);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_EDITING_ACTOR_DATA, e);
+			throw new ServiceException(PROBLEM_WITH_EDITING_ACTOR_DATA, e);
+		}
+		return updated;
+	}
+
+	@Override
+	public boolean editSecondName(int actorID, String newName, String langName) throws ServiceException {
+		if (!ActorValidator.validateActorID(actorID) || !ActorValidator.validateActorSecondName(newName)) {
+			return false;
+		}
+		if (!CommonValidator.validateLanguageName(langName)) {
+			return false;
+		}
+		Actor actor = new Actor();
+		actor.setId(actorID);
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		ActorDAO actorDAO = factory.getActorDAO();
+		boolean updated = false;
+		try {
+			updated = actorDAO.updateActorFirstName(actor, newName, langName);
 		} catch (DAOException e) {
 			logger.error(PROBLEM_WITH_EDITING_ACTOR_DATA, e);
 			throw new ServiceException(PROBLEM_WITH_EDITING_ACTOR_DATA, e);

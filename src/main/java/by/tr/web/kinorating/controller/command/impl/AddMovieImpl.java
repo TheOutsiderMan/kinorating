@@ -19,10 +19,11 @@ import org.apache.logging.log4j.Logger;
 public class AddMovieImpl implements Command {
 
 	private static final String PROBLEM_WITH_ADDING_THE_MOVIE = "Problem with adding the movie";
+	private static final String DEFAULT_LANG_NAME = "ru";
 
 	private static final Logger logger = LogManager.getLogger(AddMovieImpl.class);
 
-	private static final String REDIRECT_URL = "app?action=init_view&page=movies";
+	private static final String REDIRECT_URL = "/movies";
 
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -40,7 +41,10 @@ public class AddMovieImpl implements Command {
 			length = Integer.valueOf(lengthParameter);
 		}
 		String langName = request.getParameter(ParameterName.LOCALE);
-
+		if (langName == null) {
+			langName = DEFAULT_LANG_NAME;
+		}
+		
 		Movie movie = new Movie();
 		movie.setTitle(title);
 		movie.setDirector(director);
@@ -51,15 +55,15 @@ public class AddMovieImpl implements Command {
 
 		ServiceFactory factory = ServiceFactory.getInstance();
 		MovieService movieService = factory.getMoviesService();
-		boolean updated = false;
+		boolean added = false;
 		try {
-			updated = movieService.addMovie(movie, langName);
+			added = movieService.addMovie(movie, langName);
 		} catch (ServiceException e) {
 			logger.error(PROBLEM_WITH_ADDING_THE_MOVIE, e);
 			response.sendError(HttpServletResponse.SC_CONFLICT);
 			return;
 		}
-		if (updated) {
+		if (added) {
 			response.sendRedirect(REDIRECT_URL);
 		} else {
 			response.sendError(HttpServletResponse.SC_CONFLICT);

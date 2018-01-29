@@ -4,13 +4,13 @@ import by.tr.web.kinorating.dao.connection_pool.ConnectionPool;
 import by.tr.web.kinorating.dao.exception.DAOException;
 import by.tr.web.kinorating.service.exception.ServiceException;
 
-public final class ConnectionPoolInitializer {
+public final class ConnectionPoolManager {
 	
-	private final static ConnectionPoolInitializer initializer = new ConnectionPoolInitializer();
+	private final static ConnectionPoolManager initializer = new ConnectionPoolManager();
 	
-	private ConnectionPoolInitializer() {}
+	private ConnectionPoolManager() {}
 	
-	public static ConnectionPoolInitializer getInitializer() {
+	public static ConnectionPoolManager getInitializer() {
 		return initializer;
 	}
 	

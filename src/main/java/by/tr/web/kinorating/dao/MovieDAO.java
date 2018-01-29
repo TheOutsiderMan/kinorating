@@ -12,22 +12,26 @@ public interface MovieDAO {
 	boolean addTranslation(Movie translation, String locale) throws DAOException;
 
 	List<Movie> readAllMovies(String locale) throws DAOException;
-
-	List<Movie> readMovieByTitle(String title) throws DAOException;
 	
-	Movie readMovieById(int id) throws DAOException;
+	List<Movie> readPartOfMovies(String locale, int start, int amount) throws DAOException;
+
+	Movie readMovieById(int movieId, String locale) throws DAOException;
 
 	List<Movie> readRandomMovies(int amount, String locale) throws DAOException;
 
-	boolean updateMovieTitle(Movie movie, String newTitle) throws DAOException;
+	List<Movie> readMovieByTitle(String title) throws DAOException;
+
+	int countMoviesAmountOneLanguage(String locale) throws DAOException;
+	
+	boolean updateMovieTitle(Movie movie, String newTitle, String locale) throws DAOException;
 
 	boolean updateMovieLength(Movie movie, int newLength) throws DAOException;
 
 	boolean updateMovieYear(Movie movie, int newYear) throws DAOException;
 
-	boolean updateMovieDirector(Movie movie, String newDirector) throws DAOException;
+	boolean updateMovieDirector(Movie movie, String newDirector, String locale) throws DAOException;
 
-	boolean updateMovieGenre(Movie movie, String newGenre) throws DAOException;
+	boolean updateMovieGenre(Movie movie, String newGenre, String locale) throws DAOException;
 
 	boolean updateMovieRating(Movie movie) throws DAOException;
 	

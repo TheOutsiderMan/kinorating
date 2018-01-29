@@ -12,13 +12,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import by.tr.web.kinorating.dao.ActorDAO;
+import by.tr.web.kinorating.dao.DAOAbstractFactory;
+import by.tr.web.kinorating.dao.MovieDAO;
 import by.tr.web.kinorating.dao.connection_pool.ConnectionPool;
 import by.tr.web.kinorating.dao.exception.DAOException;
+import by.tr.web.kinorating.dao.mysql.MySQLDAOFactory;
 import by.tr.web.kinorating.domain.Actor;
 import by.tr.web.kinorating.domain.Movie;
 
 public class MySQLActorDAOImpl implements ActorDAO {
 
+	private static final String SELECT_MOVIES_ONE_ACTOR = "SELECT mov_id FROM actors WHERE act_id=?";
+	private static final String COUNT_ACTORS_ONE_LANGUAGE = "SELECT COUNT(*) FROM actors_translate WHERE lang_short_name=?";
+	private static final String SELECT_PART_ACTORS_QUERY = "SELECT actors_translate.act_id, act_first_name, act_second_name, act_age FROM actors_translate JOIN actors ON actors_translate.act_id=actors.act_id WHERE lang_short_name=? LIMIT ?,?";
 	private static final String INSERT_ACTOR_TRANSLATION_QUERY = "INSERT INTO actors_translate (act_first_name, act_second_name) VALUES (?, ?) WHERE act_id=?";
 	private static final String INSERT_ACTOR_NAME_QUERY = "INSERT INTO actors_translate (act_id, lang_short_name, act_first_name, act_second_name) VALUES (?, ?, ?, ?)";
 	private static final String CREATE_ACTOR_AGE_QUERY = "INSERT INTO actors (mov_id, act_age) VALUES(?, ?)";
@@ -29,9 +35,9 @@ public class MySQLActorDAOImpl implements ActorDAO {
 	private static final String SELECT_ACTOR_BY_NAME_QUERY = "SELECT * FROM actors_translate JOIN actors ON actors_translate.act_id=actors.act_id WHERE act_first_name=? OR act_second_name=?";
 	private static final String DELETE_ACTOR_QUERY = "DELETE FROM actors WHERE act_id=?";
 	private static final String UPDATE_ACTOR_AGE_QUERY = "UPDATE actors SET act_age=? WHERE act_id=?";
-	private static final String UPDATE_ACTOR_SECOND_NAME_QUERY = "UPDATE actors_translate SET act_second_name=? WHERE act_id=?";
-	private static final String UPDATE_ACTOR_FIRST_NAME_QUERY = "UPDATE actors_translate SET act_first_name=? WHERE act_id=?";
-	private static final String UPDATE_ACTOR_NAME_QUERY = "UPDATE actors_translate SET act_first_name=?, act_second_name=? WHERE act_id=?";
+	private static final String UPDATE_ACTOR_SECOND_NAME_QUERY = "UPDATE actors_translate SET act_second_name=? WHERE act_id=? AND lang_short_name=?";
+	private static final String UPDATE_ACTOR_FIRST_NAME_QUERY = "UPDATE actors_translate SET act_first_name=? WHERE act_id=? AND lang_short_name=?";
+	private static final String UPDATE_ACTOR_NAME_QUERY = "UPDATE actors_translate SET act_first_name=?, act_second_name=? WHERE act_id=? AND lang_short_name=?";
 	private static final String LAST_INSERT_ID = "SELECT LAST_INSERT_ID()";
 	
 	private static final String PROBLEM_WITH_READING_FROM_DB = "Problem with reading from DB";
@@ -177,6 +183,8 @@ public class MySQLActorDAOImpl implements ActorDAO {
 		try {
 			connection = ConnectionPool.getInstance().takeConnection();
 			statement = connection.prepareStatement(SELECT_ACTOR_BY_ID);
+			statement.setString(1, locale);
+			statement.setInt(2, id);
 			resultSet = statement.executeQuery();
 			if (resultSet.next()) {
 				actor.setId(resultSet.getInt(1));
@@ -364,6 +372,101 @@ public class MySQLActorDAOImpl implements ActorDAO {
 	}
 
 	@Override
+	public List<Actor> readPartOfActors(String locale, int start, int amount) throws DAOException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		List<Actor> actors = new ArrayList<Actor>();
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.prepareStatement(SELECT_PART_ACTORS_QUERY);
+			statement.setString(1, locale);
+			statement.setInt(2, start);
+			statement.setInt(3, amount);
+			resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				Actor actor = new Actor();
+				actor.setId(resultSet.getInt(1));
+				actor.setFirstName(resultSet.getString(2));
+				actor.setSecondName(resultSet.getString(3));
+				actor.setAge(resultSet.getInt(4));
+				actors.add(actor);
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);
+			}
+		}
+		return actors;
+	}
+
+	@Override
+	public int countActorsOneLanguage(String locale) throws DAOException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		int amount = 0;
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.prepareStatement(COUNT_ACTORS_ONE_LANGUAGE);
+			statement.setString(1, locale);
+			resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				amount = resultSet.getInt(1);
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);
+			}
+		}
+		return amount;
+	}
+
+	@Override
 	public boolean isExistedActor(Actor actor) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
@@ -409,7 +512,55 @@ public class MySQLActorDAOImpl implements ActorDAO {
 	}
 
 	@Override
-	public boolean updateActorName(Actor actor, String firstName, String secondName) throws DAOException {
+	public List<Movie> readMoviesOneActor(Actor actor, String locale) throws DAOException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		List<Movie> movies = new ArrayList<>();
+		try {
+			connection = ConnectionPool.getInstance().takeConnection();
+			statement = connection.prepareStatement(SELECT_MOVIES_ONE_ACTOR);
+			statement.setInt(1, actor.getId());
+			resultSet = statement.executeQuery();
+			DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+			MovieDAO movieDAO = factory.getMovieDAO();
+			while (resultSet.next()) {
+				int movieID = resultSet.getInt(1);
+				Movie movie = movieDAO.readMovieById(movieID, locale);
+				movies.add(movie); 
+			}
+		} catch (InterruptedException e) {
+			logger.error(PROBLEM_WITH_CONNECTION_POOL, e);
+			throw new DAOException(PROBLEM_WITH_CONNECTION_POOL, e);
+		} catch (SQLException e) {
+			logger.error(PROBLEM_WITH_READING_FROM_DB, e);
+			throw new DAOException(PROBLEM_WITH_READING_FROM_DB, e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(PROBLEM_TO_CLOSE_RESOURCE, e);
+					throw new DAOException(PROBLEM_TO_CLOSE_RESOURCE, e);
+				}
+			}
+			if (connection != null) {
+				ConnectionPool.getInstance().releaseConnection(connection);
+			}
+		}
+		return movies;
+	}
+
+	@Override
+	public boolean updateActorName(Actor actor, String firstName, String secondName, String locale) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		int rowCount = 0;
@@ -419,6 +570,7 @@ public class MySQLActorDAOImpl implements ActorDAO {
 			statement.setString(1, firstName);
 			statement.setString(2, secondName);
 			statement.setInt(3, actor.getId());
+			statement.setString(4, locale);
 			rowCount = statement.executeUpdate();
 			if (rowCount != 0) {
 				return true;
@@ -446,7 +598,7 @@ public class MySQLActorDAOImpl implements ActorDAO {
 	}
 
 	@Override
-	public boolean updateActorFirstName(Actor actor, String firstName) throws DAOException {
+	public boolean updateActorFirstName(Actor actor, String firstName, String locale) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		int rowCount = 0;
@@ -455,6 +607,7 @@ public class MySQLActorDAOImpl implements ActorDAO {
 			statement = connection.prepareStatement(UPDATE_ACTOR_FIRST_NAME_QUERY);
 			statement.setString(1, firstName);
 			statement.setInt(2, actor.getId());
+			statement.setString(3, locale);
 			rowCount = statement.executeUpdate();
 			if (rowCount != 0) {
 				return true;
@@ -482,7 +635,7 @@ public class MySQLActorDAOImpl implements ActorDAO {
 	}
 
 	@Override
-	public boolean updateActorSecondName(Actor actor, String secondName) throws DAOException {
+	public boolean updateActorSecondName(Actor actor, String secondName, String locale) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		int rowCount = 0;
@@ -491,6 +644,7 @@ public class MySQLActorDAOImpl implements ActorDAO {
 			statement = connection.prepareStatement(UPDATE_ACTOR_SECOND_NAME_QUERY);
 			statement.setString(1, secondName);
 			statement.setInt(2, actor.getId());
+			statement.setString(3, locale);
 			rowCount = statement.executeUpdate();
 			if (rowCount != 0) {
 				return true;

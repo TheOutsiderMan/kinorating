@@ -24,7 +24,7 @@ public class MovieServiceImpl implements MovieService {
 	private static final String PROBLEM_WITH_UPDATING_MOVIE_DATA = "Problem with updating movie data";
 	private static final String PROBLEM_WITH_ADDITION_MOVIE_TRANSLATION = "Problem with addition movie translation";
 	
-	private static final Logger logger = LogManager.getLogger(ReviewServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(MovieServiceImpl.class);
 
 	@Override
 	public boolean addMovie(Movie newMovie, String langName) throws ServiceException {
@@ -76,6 +76,44 @@ public class MovieServiceImpl implements MovieService {
 		}
 		return movies;
 	}
+	
+	@Override
+	public Movie getMovieById(int id, String langName) throws ServiceException {
+		if (!MovieValidator.validateMovieId(id) || !CommonValidator.validateLanguageName(langName)) {
+			return new Movie();
+		}
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		MovieDAO movieDAO = factory.getMovieDAO();
+		Movie movie;
+		try {
+			movie = movieDAO.readMovieById(id, langName);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_READING_MOVIES, e);
+			throw new ServiceException(PROBLEM_WITH_READING_MOVIES, e);
+		}
+		return movie;
+	}
+
+	@Override
+	public List<Movie> getPartOfMovies(String langName, int start, int amount) throws ServiceException {
+		List<Movie> movies;
+		if (!CommonValidator.validateLanguageName(langName) || !CommonValidator.validateAmount(amount)) {
+			return Collections.emptyList();
+		}
+		int totalAmount = getMoviesAmountOneLanguage(langName);
+		if (!CommonValidator.validateStartIndexInRange(start, totalAmount)) {
+			return Collections.emptyList();
+		}
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		MovieDAO movieDAO = factory.getMovieDAO();
+		try {
+			movies = movieDAO.readPartOfMovies(langName, start, amount);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_READING_MOVIES, e);
+			throw new ServiceException(PROBLEM_WITH_READING_MOVIES, e);
+		}
+		return movies;
+	}
 
 	@Override
 	public List<Movie> getRandomMovies(int amount, String langName) throws ServiceException {
@@ -83,7 +121,7 @@ public class MovieServiceImpl implements MovieService {
 		if (!CommonValidator.validateLanguageName(langName)) {
 			return Collections.emptyList();
 		}
-		if (!MovieValidator.validateAmountMovies(amount)) {
+		if (!CommonValidator.validateAmount(amount)) {
 			return Collections.emptyList();
 		}
 		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
@@ -98,8 +136,25 @@ public class MovieServiceImpl implements MovieService {
 	}
 
 	@Override
-	public boolean editMovieTitle(int movieID, String title) throws ServiceException {
-		if (!MovieValidator.validateMovieId(movieID)) {
+	public int getMoviesAmountOneLanguage(String langName) throws ServiceException {
+		int amount = 0;
+		if (!CommonValidator.validateLanguageName(langName)) {
+			return amount;
+		}
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		MovieDAO movieDAO = factory.getMovieDAO();
+		try {
+			amount = movieDAO.countMoviesAmountOneLanguage(langName);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_READING_MOVIES, e);
+			throw new ServiceException(PROBLEM_WITH_READING_MOVIES, e);
+		}
+		return amount;
+	}
+
+	@Override
+	public boolean editMovieTitle(int movieID, String title, String langName) throws ServiceException {
+		if (!MovieValidator.validateMovieId(movieID) || !CommonValidator.validateLanguageName(langName)) {
 			return false;
 		}
 		if (!MovieValidator.validateMovieTitle(title)) {
@@ -111,7 +166,7 @@ public class MovieServiceImpl implements MovieService {
 		MovieDAO movieDAO = factory.getMovieDAO();
 		boolean updated = false;
 		try {
-			updated = movieDAO.updateMovieTitle(movie, title);
+			updated = movieDAO.updateMovieTitle(movie, title, langName);
 		} catch (DAOException e) {
 			logger.error(PROBLEM_WITH_UPDATING_MOVIE_DATA, e);
 			throw new ServiceException(PROBLEM_WITH_UPDATING_MOVIE_DATA, e);
@@ -120,27 +175,11 @@ public class MovieServiceImpl implements MovieService {
 	}
 
 	@Override
-	public boolean editMovieDirector(int movieID, String director) throws ServiceException {
+	public boolean editMovieDirector(int movieID, String director, String langName) throws ServiceException {
 		if (!MovieValidator.validateMovieId(movieID) || !MovieValidator.validateMovieDirector(director)) {
 			return false;
 		}
-		Movie movie = new Movie();
-		movie.setId(movieID);
-		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
-		MovieDAO movieDAO = factory.getMovieDAO();
-		boolean updated = false;
-		try {
-			updated = movieDAO.updateMovieDirector(movie, director);
-		} catch (DAOException e) {
-			logger.error(PROBLEM_WITH_UPDATING_MOVIE_DATA, e);
-			throw new ServiceException(PROBLEM_WITH_UPDATING_MOVIE_DATA, e);
-		}
-		return updated;
-	}
-
-	@Override
-	public boolean editMovieGenre(int movieID, String genre) throws ServiceException {
-		if (!MovieValidator.validateMovieId(movieID) || !MovieValidator.validateMovieGenre(genre)) {
+		if (!CommonValidator.validateLanguageName(langName)) {
 			return false;
 		}
 		Movie movie = new Movie();
@@ -149,7 +188,29 @@ public class MovieServiceImpl implements MovieService {
 		MovieDAO movieDAO = factory.getMovieDAO();
 		boolean updated = false;
 		try {
-			updated = movieDAO.updateMovieGenre(movie, genre);
+			updated = movieDAO.updateMovieDirector(movie, director, langName);
+		} catch (DAOException e) {
+			logger.error(PROBLEM_WITH_UPDATING_MOVIE_DATA, e);
+			throw new ServiceException(PROBLEM_WITH_UPDATING_MOVIE_DATA, e);
+		}
+		return updated;
+	}
+
+	@Override
+	public boolean editMovieGenre(int movieID, String genre, String langName) throws ServiceException {
+		if (!MovieValidator.validateMovieId(movieID) || !MovieValidator.validateMovieGenre(genre)) {
+			return false;
+		}
+		if (!CommonValidator.validateLanguageName(langName)) {
+			return false;
+		}
+		Movie movie = new Movie();
+		movie.setId(movieID);
+		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
+		MovieDAO movieDAO = factory.getMovieDAO();
+		boolean updated = false;
+		try {
+			updated = movieDAO.updateMovieGenre(movie, genre, langName);
 		} catch (DAOException e) {
 			logger.error(PROBLEM_WITH_UPDATING_MOVIE_DATA, e);
 			throw new ServiceException(PROBLEM_WITH_UPDATING_MOVIE_DATA, e);

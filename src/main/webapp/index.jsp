@@ -7,24 +7,7 @@
 
 	<fmt:setLocale value="${cookie.locale.value}" />
 	<fmt:setBundle basename="localization.locale" var="locale" />
-	<fmt:message bundle="${locale}" key="locale.navbar.link.main.page" var="navbar_link_main_page" />
-	<fmt:message bundle="${locale}" key="locale.navbar.link.movies"	var="navbar_link_movies"/>
-	<fmt:message bundle="${locale}" key="locale.navbar.link.users"	var="navbar_link_users"/>
-	<fmt:message bundle="${locale}" key="locale.navbar.link.reviews" var="navbar_link_reviews"/>
-	<fmt:message bundle="${locale}" key="locale.navbar.link.search"	var="navbar_link_search"/>
-	<fmt:message bundle="${locale}" key="locale.navbar.link.log.in"	var="navbar_link_log_in"/>
-	<fmt:message bundle="${locale}" key="locale.navbar.user.menu.log.off" var="user_menu_log_off"/>
-	<fmt:message bundle="${locale}" key="locale.navbar.user.menu.profile" var="user_menu_profile"/>		
 	<fmt:message bundle="${locale}" key="locale.page.title"	var="locale_page_title"/>
-	<fmt:message bundle="${locale}"	key="locale.log.in.form.input.email.name" var="log_in_form_input_email_name"/>
-	<fmt:message bundle="${locale}" key="locale.log.in.form.input.password"	var="log_in_form_input_password"/>
-	<fmt:message bundle="${locale}"	key="locale.log.in.form.label.email.name" var="log_in_form_label_email_name"/>
-	<fmt:message bundle="${locale}" key="locale.log.in.form.label.password" var="log_in_form_label_password"/>
-	<fmt:message bundle="${locale}" key="locale.log.in.link.forgot.password" var="log_in_link_forgot_password"/>
-	<fmt:message bundle="${locale}" key="locale.log.in.link.sign.up" var="log_in_link_sign_up"/>
-	<fmt:message bundle="${locale}" key="locale.log.in.link.remember" var="log_in_link_remember"/>
-	<fmt:message bundle="${locale}" key="locale.log.in.button.log.in" var="log_in_button_log_in"/>
-	<fmt:message bundle="${locale}" key="locale.footer.text" var="footer_text"/>
 	<fmt:message bundle="${locale}" key="locale.page.body.minutes" var="minutes"/>
 	<fmt:message bundle="${locale}" key="locale.movie.vote.refuse" var="vote_not_ok_msg"/>
 	<fmt:message bundle="${locale}" key="locale.movie.vote.accept" var="vote_ok_msg"/>
@@ -36,7 +19,9 @@
 	<fmt:message bundle="${locale}" key="locale.movie.vote.delete.error" var="delete_vote_error"/>
 	<fmt:message bundle="${locale}" key="locale.movie.vote.delete.succes" var="delete_vote_succes"/>
 	<fmt:message bundle="${locale}" key="locale.movie.vote.rating" var="vote_rating"/>
-
+	<fmt:message bundle="${locale}" key="locale.page.main.heading" var="heading"/>
+	
+	
 	<title>${locale_page_title}</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -67,127 +52,12 @@
 </head>
 
 <body>
-	<header class="row-fluid">
-		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-			<a class="navbar-brand" href="index.jsp"><img alt="logo" src="img/logo.png" ></a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse"
-				data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-				aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<ul class="navbar-nav mr-auto">
-					<li class="nav-item">
-						<a class="nav-link" href="index.jsp">
-							<c:out value="${navbar_link_main_page}" />
-							<span class="sr-only">(current)</span>
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="/app/movies">
-							<c:out value="${navbar_link_movies}" />
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="app?action=init_view&page=reviews">
-							<c:out value="${navbar_link_reviews}" />
-						</a>
-					</li>
-					<c:choose>
-						<c:when test="${sessionScope.user.role.toString() == 'ADMIN' }">
-							<li class="nav-item">
-								<a class="nav-link" href="app/users">
-									<c:out value="${navbar_link_users}" />
-								</a>
-							</li>
-						</c:when>
-					</c:choose>
-				</ul>
-				<form class="form-inline my-2 my-lg-0" method="get"	action="app">
-					<input class="form-control mr-sm-2" type="search" aria-label="Search" name="searchText">
-					<button class="btn btn-dark my-2 my-sm-0" type="submit">
-						<c:out value="${navbar_link_search}" />
-					</button>
-					<input type="hidden" name="action" value="search">
-				</form>
-				<ul class="navbar-nav mx-right">
-					<li class="nav-item dropdown">
-						<c:choose>
-							<c:when test="${sessionScope.authenticated != 'yes' }">
-								<a class="nav-link dropdown-toggle" href="#" id="logIn"
-									role="button" data-toggle="dropdown" aria-haspopup="true"
-									aria-expanded="false">
-									<c:out value="${navbar_link_log_in}" />
-								</a>
-								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="logIn">
-									<form class="dropdown-item" method="post" action="app">
-										<div class="form-group">
-											<label for="emailOrlogin">
-												<c:out value="${log_in_form_label_email_name}" />
-											</label>
-											<input type="text" class="form-control" name="emailOrlogin"	placeholder="<c:out value="${log_in_form_input_email_name}"/>">
-										</div>
-										<div class="form-group">
-											<label for="password">
-												<c:out value="${log_in_form_label_password}" />
-											</label>
-											<input type="password" class="form-control" name="password" placeholder="<c:out value="${log_in_form_label_password}"/>">
-										</div>
-										<div class="form-check">
-											<label class="form-check-label">
-												<input type="checkbox" class="form-check-input" name="rememberUser">
-												<c:out value="${log_in_link_remember}" />
-											</label>
-										</div>
-										<input type="hidden" name="action" value="authentication">
-										<input type="hidden" name="url" value="${pageContext.request.requestURI}">
-										<button type="submit" class="btn btn-primary">
-											<c:out value="${log_in_button_log_in}" />
-										</button>
-									</form>
-									<div class="dropdown-divider"></div>
-									<a class="dropdown-item" href="registration">
-										<c:out value="${log_in_link_sign_up}" />
-									</a>
-									<a class="dropdown-item" href="#">
-										<c:out value="${log_in_link_forgot_password}" />
-									</a>
-								</div>
-							</c:when>
-							<c:otherwise>
-								<a class="nav-link dropdown-toggle" href="#" id="navbar-user-menu"
-									role="button" data-toggle="dropdown" aria-haspopup="true"
-									aria-expanded="false">
-									<c:out value="${sessionScope.user.login}" />
-								</a>
-								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbar-user-menu">
-									<a class="dropdown-item" href="user/profile">
-										<c:out value="${user_menu_profile}" />
-									</a>
-									<div class="dropdown-divider"></div>	
-									<a class="dropdown-item" href="app?action=log_off" >  
-										<c:out value="${user_menu_log_off}" />
-									</a>
-								</div>
-							</c:otherwise>
-						</c:choose>
-					</li>
-					<form class="nav-item" method="post" action="app">
-						<input type="hidden" name="action" value="change_language">
-							<div class="btn-group-vertical">
-							<button class="btn btn-dark btn-sm py-0 languages" name="locale" type="submit" value="en_US">EN</button>
-							<button class="btn btn-dark btn-sm py-0 languages" name="locale" type="submit" value="ru">RU</button>
-							<input type="hidden" name="url"	value="${pageContext.request.requestURI}">
-						</div>
-					</form>
-				</ul>
-			</div>
-		</nav>
-	</header>
+	<c:import url="/WEB-INF/jsp/header.jsp"/>
 	<main role="main" class="container-fluid">
 		<div class="row">
 			<div class="col-6 offset-3" id="items">
-			<c:set var="randomMovies" value="${requestScope.item}"></c:set>	
+			<h2 class="text-center main-page-h"><c:out value="${heading}"/></h2>
+			<c:set var="randomMovies" value="${requestScope.item}"/>	
 			<c:choose>
 				<c:when test="${not empty randomMovies}">
 					<ul class="list-group">
@@ -197,18 +67,19 @@
 									<div class="col-7">
 										<input type="hidden" name="movie" value='<c:out value="${movie.id}"/>'>
 										<h3 class="card-title">
-											<a href="movies/${movie.id}"><c:out value="${movie.title}"/></a>	
+											<a href="<c:url value="movies/${movie.id}"/>"><c:out value="${movie.title}"/></a>	
 										</h3>
 										<h6 class="card-text text-secondary"><c:out value="${movie.year}, ${movie.length} ${minutes}"/></h6>
 										<h5 class="card-text text-secondary"><c:out value="${movie.director}"/></h5>
 										<h5 class="card-text text-secondary">
 											<c:forEach items="${movie.actors}" var="actor" varStatus="i" end="3">
 										   		<c:choose>
+										   	
 										  			<c:when test="${i.count == 3 || i.count == movie.actors.size()}">
-										   				<a href="actors/${actor.id}"><c:out value="${actor.firstName} ${actor.secondName}"/></a>
+										   				<a href="<c:url value="actors/${actor.id}"/>"><c:out value="${actor.firstName} ${actor.secondName}"/></a>
 										   			</c:when>
 										   			<c:otherwise>
-										   				<a href="actors/${actor.id}"><c:out value="${actor.firstName} ${actor.secondName}"/></a>, 
+										   				<a href="<c:url value="actors/${actor.id}"/>"><c:out value="${actor.firstName} ${actor.secondName}"/></a>, 
 										   			</c:otherwise>
 										   		</c:choose>
 										   	</c:forEach>
@@ -227,9 +98,6 @@
 													auth = true
 												}
 												$('#rating-movie-${movie.id}').rating({
-											        image: 'img/stars.png',
-											        width: 32,
-													url: 'app',
 													auth: auth,
 													msgOK: '${vote_ok_msg}',
 													msgNotOk: '${vote_not_ok_msg}',
@@ -240,22 +108,23 @@
 											})
 										</script>
 										<div class="vote-container">
-											<h5 class="card-text text-secondary"><c:out value="${vote_rating}"/> <b><c:out value="${movie.rating}"/></b></h5>
+											<h5 class="card-text text-secondary"><c:out value="${vote_rating}"/> <b><fmt:formatNumber maxFractionDigits="3" value="${movie.rating}"/></b></h5>
 											<c:choose>
 												<c:when test="${user.marks.containsKey(movie.id)}">
 													<h5 class="card-text text-secondary user-vote">
-														<c:out value="${user_vote}"/> <b><c:out value="${user.marks.get(movie.id)}"/></b>
+														<c:out value="${user_vote}"/> <span id="user-vote-${movie.id}" class="badge badge-info"><b><c:out value="${user.marks.get(movie.id)}"/></b></span>
 													</h5>
-													<a href="#" data-user="${user.login}" data-movie="${movie.id}" data-error="${delete_vote_error}" data-success="${delete_vote_succes}" data-page="${pageContext.request.requestURL}" class="delete-movie btn btn-secondary"><c:out value="${delete_vote}"/></a>
+													<a href="" data-user="${user.login}" data-movie="${movie.id}" data-error="${delete_vote_error}" data-success="${delete_vote_succes}" data-page="${pageContext.request.requestURL}" class="delete-movie btn btn-link btn-sm text-secondary"><c:out value="${delete_vote}"/></a>
 												</c:when>
 												<c:otherwise>
-													<h6 class="card-text text-secondary">
+													<h6 class="card-text text-secondary" id="not-voted-${movie.id}">
 														<c:out value="${no_user_vote}"/>
 													</h6>
 												</c:otherwise>
 											</c:choose>
 											<h5 class="card-text text-secondary">
-												<c:out value="${amount_votes} ${movie.voteAmount}" />
+												<c:out value="${amount_votes}" />
+												<span id="vote-amount-${movie.id}" > <c:out value="${movie.voteAmount}"/></span>
 											</h5>
 										</div>
 									</div>
@@ -265,18 +134,12 @@
 					</ul>
 				</c:when>
 				<c:otherwise>
-					<c:redirect url="app?action=init_view&page=main"/>
+					<c:redirect url="main"/>
 				</c:otherwise>
 			</c:choose>	
 			</div>
 		</div>
 	</main>
-	<footer class="footer">
-		<div class="container">
-			<p class="text-center">
-				<c:out value="${footer_text}" />
-			</p>
-		</div>
-	</footer>
+	<c:import url="/WEB-INF/jsp/footer.jsp"/>
 </body>
 </html>
