@@ -37,8 +37,10 @@ public class UsersPageInitImpl implements Command {
 		String itemsPerPageStr = request.getParameter(ParameterName.ITEMS_PER_PAGE);
 		int page = DEFAULT_PAGE;
 		int itemsPerPage = DEFAULT_ITEMS_PER_PAGE;
-		if (pageStr != null && itemsPerPageStr != null) {
+		if (pageStr != null ) {
 			page = Integer.valueOf(pageStr);
+		}
+		if (itemsPerPageStr != null) {
 			itemsPerPage = Integer.valueOf(itemsPerPageStr);
 		}
 		ServiceFactory factory = ServiceFactory.getInstance();

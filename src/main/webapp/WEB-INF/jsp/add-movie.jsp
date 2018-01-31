@@ -43,7 +43,7 @@
 	<link rel="icon" type="image/png" sizes="16x16" href="<c:url value="/favicon/favicon-16x16.png"/>">
 	<link rel="manifest" href="<c:url value="/favicon/manifest.json"/>">
 	<meta name="msapplication-TileColor" content="#ffffff">
-	<meta name="msapplication-TileImage" content="<c:url value="/avicon/ms-icon-144x144.png"/>f">
+	<meta name="msapplication-TileImage" content="<c:url value="/favicon/ms-icon-144x144.png"/>f">
 	<meta name="theme-color" content="#ffffff">
 	
 	<link rel="stylesheet" href="<c:url value="/bootstrap/css/bootstrap.min.css"/>">
@@ -119,8 +119,8 @@
 	</main>
 	<c:import url="/WEB-INF/jsp/footer.jsp"/>
 	
-	<script src="<c:url value="js/jquery-3.2.1.min.js"/>"></script>
-	<script src="<c:url value="bootstrap/js/bootstrap.bundle.js"/>"></script>
-	<script src="<c:url value="js/main.js"/>"></script>
+	<script src="<c:url value="/js/jquery-3.2.1.min.js"/>"></script>
+	<script src="<c:url value="/bootstrap/js/bootstrap.bundle.js"/>"></script>
+	<script src="<c:url value="/js/main.js"/>"></script>
 </body>
 </html>

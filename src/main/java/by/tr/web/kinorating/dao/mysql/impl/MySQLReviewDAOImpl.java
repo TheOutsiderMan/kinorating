@@ -187,7 +187,7 @@ public class MySQLReviewDAOImpl implements ReviewDAO {
 	}
 
 	@Override
-	public List<Review> readReviewsByUser(User user) throws DAOException {
+	public List<Review> readReviewsByUser(User user, String locale) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
@@ -203,7 +203,7 @@ public class MySQLReviewDAOImpl implements ReviewDAO {
 			while (resultSet.next()) {
 				review.setId(resultSet.getInt(1));
 				int movieID = resultSet.getInt(3);
-				Movie movie = movieDAO.readMovieById(movieID, null);
+				Movie movie = movieDAO.readMovieById(movieID, locale);
 				review.setReviewedMovie(movie);
 				review.setAuthor(user);
 				review.setTextReview(resultSet.getString(4));
@@ -296,7 +296,7 @@ public class MySQLReviewDAOImpl implements ReviewDAO {
 	}
 
 	@Override
-	public List<Review> readAllReviews() throws DAOException {
+	public List<Review> readAllReviews(String locale) throws DAOException {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet resultSet = null;
@@ -311,7 +311,7 @@ public class MySQLReviewDAOImpl implements ReviewDAO {
 			MovieDAO movieDAO = factory.getMovieDAO();
 			while (resultSet.next()) {
 				int movieID = resultSet.getInt(1);
-				Movie movie = movieDAO.readMovieById(movieID, null);
+				Movie movie = movieDAO.readMovieById(movieID, locale);
 				review.setReviewedMovie(movie);
 				review.setTextReview(resultSet.getString(2));
 				java.util.Date date = new java.util.Date(resultSet.getDate(3).getTime());
@@ -352,7 +352,7 @@ public class MySQLReviewDAOImpl implements ReviewDAO {
 	}
 
 	@Override
-	public List<Review> readPartOfReviews(int start, int amount) throws DAOException {
+	public List<Review> readPartOfReviews(int start, int amount, String locale) throws DAOException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
@@ -363,20 +363,20 @@ public class MySQLReviewDAOImpl implements ReviewDAO {
 			statement.setInt(1, start);
 			statement.setInt(2, amount);
 			resultSet = statement.executeQuery();
-			Review review = new Review();
 			DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
 			UserDAO userDAO = factory.getUserDAO();
 			MovieDAO movieDAO = factory.getMovieDAO();
 			while (resultSet.next()) {
+				Review review = new Review();
 				int movieID = resultSet.getInt(1);
-				Movie movie = movieDAO.readMovieById(movieID, null);
+				Movie movie = movieDAO.readMovieById(movieID, locale);
 				review.setReviewedMovie(movie);
 				review.setTextReview(resultSet.getString(2));
 				java.util.Date date = new java.util.Date(resultSet.getDate(3).getTime());
 				review.setAdditionDate(date);
 				User user = userDAO.readUserByLogin(resultSet.getString(4));
-				review.setId(resultSet.getInt(5));
 				review.setAuthor(user);
+				review.setId(resultSet.getInt(5));
 				reviews.add(review);
 			}
 		} catch (InterruptedException e) {

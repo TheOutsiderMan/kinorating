@@ -13,13 +13,13 @@ public interface ReviewDAO {
 	
 	Review readReview(User user, Movie movie) throws DAOException;
 
-	List<Review> readReviewsByUser(User user) throws DAOException;
+	List<Review> readReviewsByUser(User user, String locale) throws DAOException;
 
 	List<Review> readMovieReviews(Movie movie) throws DAOException;
 	
-	List<Review> readAllReviews() throws DAOException;
+	List<Review> readAllReviews(String locale) throws DAOException;
 	
-	List<Review> readPartOfReviews(int start, int amount) throws DAOException;
+	List<Review> readPartOfReviews(int start, int amount, String locale) throws DAOException;
 	
 	int countReviewsAmount() throws DAOException;
 	

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,6 +24,7 @@ public class ReviewsPageInitImpl implements Command {
 	private static final String ITEM_ATTR = "item";
 	private static final String REVIEWS_PAGE = "reviews";
 	private static final String PAGES_AMOUNT_ATTR = "pages";
+	private static final String DEFAULT_LANG_NAME = "ru";
 	
 	private static final int DEFAULT_ITEMS_PER_PAGE = 10;
 	private static final int DEFAULT_PAGE = 1;
@@ -35,17 +37,27 @@ public class ReviewsPageInitImpl implements Command {
 		String itemsPerPageStr = request.getParameter(ParameterName.ITEMS_PER_PAGE);
 		int page = DEFAULT_PAGE;
 		int itemsPerPage = DEFAULT_ITEMS_PER_PAGE;
-		if (pageStr != null && itemsPerPageStr != null) {
+		if (pageStr != null ) {
 			page = Integer.valueOf(pageStr);
+		}
+		if (itemsPerPageStr != null) {
 			itemsPerPage = Integer.valueOf(itemsPerPageStr);
 		}
+		Cookie[] cookies = request.getCookies();
+		String langName = DEFAULT_LANG_NAME;
+		for (Cookie cookie : cookies) {
+			if (cookie.getName().equalsIgnoreCase(ParameterName.LOCALE)) {
+				langName = cookie.getValue();
+			}
+		}
+		langName = langName.substring(0, 2);
 		ServiceFactory factory = ServiceFactory.getInstance();
 		ReviewService reviewService = factory.getReviewsService();
 		List<Review> reviews = null;
 		int start = itemsPerPage * (page - 1);
 		int reviewsAmount = 0;
 		try {
-			reviews = reviewService.getPartOfReviews(start, itemsPerPage);
+			reviews = reviewService.getPartOfReviews(start, itemsPerPage, langName);
 			reviewsAmount = reviewService.getReviewsAmount();
 		} catch (ServiceException e) {
 			logger.error(PROBLEM_WITH_GETTING_REVIEWS, e);

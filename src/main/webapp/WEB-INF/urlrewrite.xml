@@ -18,6 +18,10 @@
 		<to>/app?action=add_actor_init</to>
 	</rule>
 	<rule>
+		<from>^/(.+);jsessionid=(.+)</from>
+		<to>/$1</to>
+	</rule>
+	<rule>
 		<from>^/user/profile$</from>
 		<to>/app?action=user_profile_init</to>
 	</rule>
@@ -28,9 +32,5 @@
 	<rule>
 		<from>^/(?!app|css|js|img|bootstrap|favicon)([a-zA-Z_-]+)$</from>
 		<to>/app?action=show_$1</to>
-	</rule>
-	<rule>
-		<from>^/(.+);jsessionid=(.+)</from>
-		<to>/$1</to>
 	</rule>
 </urlrewrite>

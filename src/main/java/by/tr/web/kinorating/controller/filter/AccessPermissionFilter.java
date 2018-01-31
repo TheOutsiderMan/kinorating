@@ -21,8 +21,7 @@ public class AccessPermissionFilter implements Filter {
 
 	public void destroy() {}
 
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
 		User user = (User) req.getSession().getAttribute(SESSION_ATTR_USER);
 		if (user != null && user.getRole().equals(Role.ADMIN)) {

@@ -34,6 +34,9 @@
 	<fmt:message bundle="${locale}" key="locale.movie.add.actors" var="add_actors"/>
 	<fmt:message bundle="${locale}" key="locale.actor.age" var="actor_age"/>
 	<fmt:message bundle="${locale}" key="locale.reviews.delete" var="delete_review"/>
+	<fmt:message bundle="${locale}" key="locale.movie.reviews.add" var="add_review"/>
+	<fmt:message bundle="${locale}" key="locale.movie.reviews.add.button" var="add_review_button"/>
+	
 	
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -69,7 +72,7 @@
 	<main role="main" class="container-fluid"> 
 		<div class="row">
 			<div class="col-6 offset-3 border border-light p-0">
-				<h3 class="text-center card-header">${movie_information}</h3>
+				<h3 class="text-center card-header my-3">${movie_information}</h3>
 				<div class="row card-body border-light">
 					<div class="col-4 h5">
 						${title_label}
@@ -163,9 +166,9 @@
 						<c:choose>
 							<c:when test="${user.marks.containsKey(movie.id)}">
 								<h5 class="card-text text-secondary user-vote">
-									<c:out value="${user_vote}"/> <span id="user-vote-${requestScope.item.id}" class="badge badge-info"><b><c:out value="${user.marks.get(requestScope.item.id)}"/></b></span>
+									<c:out value="${user_vote}"/> <span id="user-vote-${requestScope.item.id}" class="badge badge-info"><b><c:out value="${sessionScope.user.marks.get(requestScope.item.id)}"/></b></span>
 								</h5>
-								<a href="" data-user="${user.login}" data-movie="${requestScope.item.id}" data-error="${delete_vote_error}" data-success="${delete_vote_succes}" data-page="${pageContext.request.requestURL}" class="delete-movie btn btn-link btn-sm text-secondary"><c:out value="${delete_vote}"/></a>
+								<a href="" data-user="${sessionScope.user.login}" data-movie="${requestScope.item.id}" data-error="${delete_vote_error}" data-success="${delete_vote_succes}" data-page="${pageContext.request.requestURL}" class="delete-movie btn btn-link btn-sm text-secondary"><c:out value="${delete_vote}"/></a>
 							</c:when>
 							<c:otherwise>
 								<h6 class="card-text text-secondary" id="not-voted-${movie.id}">
@@ -188,7 +191,7 @@
 								<c:forEach items="${actors}" var="actor">
 									<li class="list-group-item card" id="actor-${actor.id}">
 										<h3 class="card-title">
-												<a href="<c:url value="actors/${actor.id}"/>"><c:out value="${actor.firstName}"/> <c:out value="${actor.secondName}"/></a>	
+												<a href="<c:url value="/actors/${actor.id}"/>"><c:out value="${actor.firstName}"/> <c:out value="${actor.secondName}"/></a>	
 										</h3>
 										<h5 class="card-text text-secondary"><c:out value="${actor_age}"/> <c:out value="${actor.age}"/></h5>
 									</li>		
@@ -206,13 +209,24 @@
 				<div class="container-fluid border-light p-0">
 					<h3 class="text-center card-header">${reviews_heading}</h3>
 					<c:set var="reviews" value="${requestScope.movie_reviews}"/>
+					<c:if test="${requestScope.has_review != 'yes' && sessionScope.authenticated != 'yes'}">
+						<form action="app">
+							<div class="form-group">
+							    <label for="user-review" class="h5 py-1"><c:out value="${add_review}"/></label>
+							    <textarea class="form-control" id="user-review" rows="3" name="review"></textarea>
+							    <input type="submit" value="${add_review_button}">
+							    <input name="movieID" value="${requestScope.item.id}" hidden="">
+							    <input name="action" value="add_review" hidden="">
+							 </div>
+						</form>
+					</c:if>
 					<c:choose>
 						<c:when test="${not empty reviews}">
 							<c:forEach items="${reviews}" var="review">
 								<div class="card border-light" id="review-${review.id}">
 									<div class="card-header">
-										<span class="px-1">${review_user} ${review.user.login}</span>
-										<span class="px-1">${review_added} <fmt:formatDate type="date" value="${review.additionDate}"/></span>
+										<span class="px-2">${review_user} ${review.author.login}</span>
+										<span class="px-2">${review_added} <fmt:formatDate type="date" value="${review.additionDate}"/></span>
 									</div>
 									<div class="card-body">
 									    <p class="card-text">${review.textReview}</p>

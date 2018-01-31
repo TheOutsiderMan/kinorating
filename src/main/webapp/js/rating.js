@@ -29,6 +29,9 @@ $(function() {
         this.vote_hover = $('<div class="vote-hover"></div>');
         this.vote_stars = $('<div class="vote-stars"></div>');
         this.vote_active = $('<div class="vote-active"></div>');
+        this.user_mark = $('#user-vote-' + this.options.movieID).attr('data-user-vote');
+        this.user_mark_block = $('#user-vote-' + this.options.movieID);
+        this.rating_block = $("#rating-" + this.options.movieID);
         this.init();
     };
     var $r = $.rating;
@@ -60,9 +63,10 @@ $(function() {
                 });
             }).on('mouseout', function() {
                 if (self.options.readOnly) {
-                	self.set();
+                	self.applyVote(self.user_mark);
+                } else {
+                	self.reset();
                 }
-                self.reset();
             }).on('click.rating', function() {
                 if (!self.options.auth) {
                 	$('#rating-movie-' + self.options.movieID).after("<div class='alert alert-warning alert-dismissible fade show movie-alert' role='alert'>" + self.options.msgNotOk + 
@@ -83,6 +87,7 @@ $(function() {
                 }
                 self.options.readOnly = true;
                 self.options.click.apply(this, [mark]);
+                
             });
         },
         set: function() {
@@ -97,9 +102,9 @@ $(function() {
                 'background-position': '0 -64px'
             });
         },
-        applyVote: function(user_mark){
+        applyVote: function(value){
         	this.vote_active.css({
-                'width': user_mark * this.options.width,
+                'width': value * this.options.width,
                 'background-position': '0 -96px'
             });
         },
@@ -137,6 +142,7 @@ $(function() {
                     $('#rating-movie-' + self.options.movieID).after("<div class='alert alert-success alert-dismissible fade show movie-success' role='alert'>" + self.options.msgOK +  
                     		"<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
                     this.old = this.val;
+                    this.user_mark = mark;
                     self.applyVote(mark);
                 },
                 error: function(data) {
@@ -165,5 +171,6 @@ $(function() {
             });
         }
     };
+    
 });
 	

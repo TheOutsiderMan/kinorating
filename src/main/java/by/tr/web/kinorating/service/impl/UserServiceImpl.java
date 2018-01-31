@@ -34,13 +34,13 @@ public class UserServiceImpl implements UserService {
 	private static final String PROBLEM_WITH_READING_MOVIE = "Problem with reading movie";
 	private static final String PROBLEM_WITH_READING_USER = "Problem with reading user";
 	private static final String PROBLEM_WITH_GETTING_ALL_USERS = "Problem with getting all users";
-	
+
 	private static final int STEP_TO_CHANGE_USER_RATING = 1;
 	private static final int MAX_DIFF_RATING_AND_MARK = 3;
 	private static final int DEFAULT_RATING = 0;
-	
+
 	private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
-	
+
 	@Override
 	public boolean registerUser(String login, String email, String password) throws ServiceException {
 		if (!UserValidator.validateLoginEmailPassword(login, email, password)) {
@@ -186,7 +186,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return banned;
 	}
-	
+
 	@Override
 	public boolean unbanUser(String login) throws ServiceException {
 		if (!UserValidator.validateLogin(login)) {
@@ -226,8 +226,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean changeUserMarkToMovie(String login, int movieID, int newMark, String locale) throws ServiceException {
-		if (!UserValidator.validateLogin(login)) {
+	public boolean changeUserMarkToMovie(String login, int movieID, int newMark, String locale)
+			throws ServiceException {
+		if (!UserValidator.validateLogin(login) || !CommonValidator.validateLanguageName(locale)) {
 			return false;
 		}
 		if (!MovieValidator.validateMovieId(movieID) || !UserValidator.validateMovieMark(newMark)) {
@@ -319,6 +320,5 @@ public class UserServiceImpl implements UserService {
 		}
 		return deleted;
 	}
-	
-	
+
 }

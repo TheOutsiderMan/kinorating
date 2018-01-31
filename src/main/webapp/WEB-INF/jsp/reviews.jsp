@@ -7,9 +7,14 @@
 
 	<fmt:setLocale value="${cookie.locale.value}" />
 	<fmt:setBundle basename="localization.locale" var="locale" />
-	<fmt:message bundle="${locale}" key="locale.page.title.reviews"	var="locale_page_title"></fmt:message>
+	<fmt:message bundle="${locale}" key="locale.page.title.reviews"	var="page_title"/>
+	<fmt:message bundle="${locale}" key="locale.page.empty" var="no_reviews"/>
+	<fmt:message bundle="${locale}" key="locale.reviews.added" var="review_added"/>
+	<fmt:message bundle="${locale}" key="locale.reviews.user" var="review_user"/>
+	<fmt:message bundle="${locale}" key="locale.user.profile.reviews.movie" var="reviewed_movie"/>
+	<fmt:message bundle="${locale}" key="locale.reviews.delete" var="delete_review"/>
 	
-	<title>${locale_page_title}</title>
+	<title>${page_title}</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
@@ -39,8 +44,41 @@
 	<main class="container-fluid">
 		<div class="row">
 			<div class="col-6 offset-3">
-			
+				<h3 class="my-3 text-center"><c:out value="${page_title}"/></h3>
+				<c:set var="reviews" value="${requestScope.item}"/>	
+				<c:choose>
+					<c:when test="${not empty reviews}">
+						<ul class="list-group">
+						<c:forEach items="${reviews}" var="review">
+							<li class="list-group-item card border-light" id="review-${review.id}">
+								<div class="card-header">
+									<span class="px-1">${reviewed_movie} <a href='<c:url value="/movies/${review.reviewedMovie.id}"/>' class="btn btn-link btn-sm text-secondary" role="button">${review.reviewedMovie.title}</a> </span>
+									<span class="px-1">${review_user} ${review.author.login}</span>
+									<span class="px-1">${review_added} <fmt:formatDate type="date" value="${review.additionDate}"/></span>
+								</div>
+								<div class="card-body">
+								    <p class="card-text">${review.textReview}</p>
+								    <c:if test="${sessionScope.user.role.toString() == 'ADMIN' }">
+										<a href="" class="btn btn-link btn-sm text-secondary" role="button" data-review="${review.id}" id="delete-review"><c:out value="${delete_review}"/></a>
+									</c:if>
+								</div>
+							</li>
+						</c:forEach>
+						</ul>
+					</c:when>
+					<c:otherwise>
+						<p><c:out value="${no_reviews}"/></p>
+					</c:otherwise>
+				</c:choose>
 			</div>
+			<c:if test="${requestScope.pages > 1}">
+				<div class="col-6 offset-3" >
+					<nav >
+					  <ul class="pagination justify-content-center" id="pagination-holder" data-pages="${requestScope.pages}" data-current="${requestScope.currentPage}" data-category="reviews">
+					  </ul>
+					</nav>
+				</div>
+			</c:if>
 		</div>
 	</main>
 	<c:import url="/WEB-INF/jsp/footer.jsp"/>

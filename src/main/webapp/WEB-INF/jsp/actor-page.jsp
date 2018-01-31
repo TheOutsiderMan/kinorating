@@ -60,7 +60,7 @@
 	<main role="main" class="container-fluid"> 
 		<div class="row">
 			<div class="col-6 offset-3">
-				<h3 class="text-center">${actor_profile}</h3>
+				<h3 class="text-center my-3">${actor_profile}</h3>
 				<div class="row">
 					<div class="col-2 h5">
 						${first_name}
@@ -112,7 +112,7 @@
 									<div class="col-7">
 										<input type="hidden" name="movie" value='<c:out value="${movie.id}"/>'>
 										<h3 class="card-title">
-											<a href="<c:url value="movies/${movie.id}"/>"><c:out value="${movie.title}"/></a>	
+											<a href="<c:url value="/movies/${movie.id}"/>"><c:out value="${movie.title}"/></a>	
 										</h3>
 										<h6 class="card-text text-secondary"><c:out value="${movie.year}, ${movie.length} ${minutes}"/></h6>
 										<h5 class="card-text text-secondary"><c:out value="${movie.director}"/></h5>

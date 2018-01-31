@@ -21,12 +21,12 @@
 	<fmt:message bundle="${locale}" key="locale.movie.vote.rating" var="vote_rating"/>
 	<fmt:message bundle="${locale}" key="locale.movie.add.button" var="add_movie"/>
 	<fmt:message bundle="${locale}" key="locale.extra.actions" var="extra_actions"/>
-	<fmt:message bundle="${locale}" key="locale.extra.button.delete" var="delete_movie"/>
 	<fmt:message bundle="${locale}" key="locale.extra.button.translation" var="add_translation"/>
 	<fmt:message bundle="${locale}" key="locale.extra.button.delete.movie.error" var="delete_movie_error"/>
 	<fmt:message bundle="${locale}" key="locale.extra.button.delete.movie.success" var="delete_movie_success"/>
 	<fmt:message bundle="${locale}" key="locale.extra.button.edit" var="edit_movie"/>
 	<fmt:message bundle="${locale}" key="locale.movie.add.actors" var="add_actors"/>
+	<fmt:message bundle="${locale}" key="locale.page.empty" var="no_movies"/>
 	
 	<title>${locale_page_title}</title>
 	<meta charset="utf-8">
@@ -64,6 +64,7 @@
 	<main role="main" class="container-fluid">
 		<div class="row">
 			<div class="col-6 offset-3" id="items">
+			<h3 class="my-3 text-center"><c:out value="${locale_page_title}"/></h3>
 			<c:set var="movies" value="${requestScope.item}"/>	
 			<c:choose>
 				<c:when test="${not empty movies}">
@@ -120,7 +121,7 @@
 													<h5 class="card-text text-secondary user-vote">
 														<c:out value="${user_vote}"/> <span id="user-vote-${movie.id}" class="badge badge-info"><b><c:out value="${user.marks.get(movie.id)}"/></b></span>
 													</h5>
-													<a href="" data-user="${user.login}" data-movie="${movie.id}" data-error="${delete_vote_error}" data-success="${delete_vote_succes}" data-page="${pageContext.request.requestURL}" class="delete-movie btn btn-link btn-sm text-secondary"><c:out value="${delete_vote}"/></a>
+													<a href="" data-user="${user.login}" data-movie="${movie.id}" data-error="${delete_vote_error}" data-success="${delete_vote_succes}" data-page="${pageContext.request.requestURI}" class="delete-movie btn btn-link btn-sm text-secondary"><c:out value="${delete_vote}"/></a>
 												</c:when>
 												<c:otherwise>
 													<h6 class="card-text text-secondary" id="not-voted-${movie.id}">
@@ -151,13 +152,13 @@
 					</ul>
 				</c:when>
 				<c:otherwise>
-					<c:redirect url="${pageContext.request.contextPath}/movies"/>
+					<p><c:out value="${no_movies}"/></p>
 				</c:otherwise>
 			</c:choose>	
 			</div>
 			<c:if test="${sessionScope.user.role.toString() == 'ADMIN' }">
 				<div class="col-3" >
-					<a href="movies/add-movie" class="btn btn-secondary" role="button" id="add-movie-btn"><c:out value="${add_movie}"/> </a>
+					<a href="movies/add-movie" class="btn btn-secondary m-4" role="button" id="add-movie-btn"><c:out value="${add_movie}"/> </a>
 				</div>
 			</c:if>
 			

@@ -61,12 +61,15 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
-	public List<Review> showAllReviews() throws ServiceException {
+	public List<Review> showAllReviews(String langName) throws ServiceException {
 		List<Review> reviews = null;
+		if (!CommonValidator.validateLanguageName(langName)) {
+			return Collections.emptyList();
+		}
 		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
 		ReviewDAO reviewDAO = factory.getReviewDAO();
 		try {
-			reviews = reviewDAO.readAllReviews();
+			reviews = reviewDAO.readAllReviews(langName);
 		} catch (DAOException e) {
 			logger.error(PROBLEM_WITH_READING_REVIEWS, e);
 			throw new ServiceException(PROBLEM_WITH_READING_REVIEWS, e);
@@ -75,16 +78,19 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
-	public List<Review> getPartOfReviews(int start, int amount) throws ServiceException {
+	public List<Review> getPartOfReviews(int start, int amount, String langName) throws ServiceException {
 		int totalAmount = getReviewsAmount();
 		if (!CommonValidator.validateAmount(amount) || !CommonValidator.validateStartIndexInRange(start, totalAmount)) {
+			return Collections.emptyList();
+		}
+		if (!CommonValidator.validateLanguageName(langName)) {
 			return Collections.emptyList();
 		}
 		List<Review> reviews = null;
 		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
 		ReviewDAO reviewDAO = factory.getReviewDAO();
 		try {
-			reviews = reviewDAO.readPartOfReviews(start, amount);
+			reviews = reviewDAO.readPartOfReviews(start, amount, langName);
 		} catch (DAOException e) {
 			logger.error(PROBLEM_WITH_READING_REVIEWS, e);
 			throw new ServiceException(PROBLEM_WITH_READING_REVIEWS, e);
@@ -107,9 +113,9 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
-	public List<Review> showUserReview(String login) throws ServiceException {
+	public List<Review> showUserReviews(String login, String langName) throws ServiceException {
 		List<Review> reviews = null;
-		if (!UserValidator.validateLogin(login)) {
+		if (!UserValidator.validateLogin(login) || !CommonValidator.validateLanguageName(langName)) {
 			return Collections.emptyList();
 		}
 		DAOAbstractFactory factory = MySQLDAOFactory.getInstance();
@@ -117,7 +123,7 @@ public class ReviewServiceImpl implements ReviewService {
 		User user = new User();
 		user.setLogin(login);
 		try {
-			reviewDAO.readReviewsByUser(user);
+			reviews = reviewDAO.readReviewsByUser(user, langName);
 		} catch (DAOException e) {
 			logger.error(PROBLEM_WITH_READING_REVIEWS, e);
 			throw new ServiceException(PROBLEM_WITH_READING_REVIEWS, e);
@@ -136,7 +142,7 @@ public class ReviewServiceImpl implements ReviewService {
 		Movie movie = new Movie();
 		movie.setId(movieID);
 		try {
-			reviewDAO.readMovieReviews(movie);
+			reviews = reviewDAO.readMovieReviews(movie);
 		} catch (DAOException e) {
 			logger.error(PROBLEM_WITH_READING_REVIEWS, e);
 			throw new ServiceException(PROBLEM_WITH_READING_REVIEWS, e);

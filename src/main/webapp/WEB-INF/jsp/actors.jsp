@@ -16,7 +16,7 @@
 	<fmt:message bundle="${locale}" key="locale.extra.button.delete.actor.error" var="delete_actor_error"/>
 	<fmt:message bundle="${locale}" key="locale.extra.button.delete.actor.success" var="delete_actor_success"/>
 	<fmt:message bundle="${locale}" key="locale.extra.button.edit" var="edit_actor"/>
-	
+	<fmt:message bundle="${locale}" key="locale.page.empty" var="no_actors"/>
 	
 	<title>${page_title}</title>
 	<meta charset="utf-8">
@@ -52,6 +52,7 @@
 	<main role="main" class="container-fluid">
 		<div class="row">
 			<div class="col-6 offset-3" id="items">
+			<h3 class="my-3 text-center"><c:out value="page_title"/></h3>
 			<c:set var="actors" value="${requestScope.item}"/>	
 			<c:choose>
 				<c:when test="${not empty actors}">
@@ -63,11 +64,13 @@
 								</h3>
 								<h5 class="card-text text-secondary"><c:out value="${actor_age}"/> <c:out value="${actor.age}"/></h5>
 								<c:if test="${sessionScope.user.role.toString() == 'ADMIN' }">
-									<a href="#extra-actions" data-toggle="collapse" aria-expanded="false" aria-controls="extra-actions" class="btn btn-secondary" role="button"><c:out value="${extra_actions}"/> </a>
-									<div class="collapse" id="extra-actions">
-										<a href="actors/add-actor?translation${actor.id}" class="btn btn-primary" role="button" id="add-actor-translation"><c:out value="${add_translation}"/> </a>
-										<a href="actors/${actor.id}" class="btn btn-primary" role="button" id="edit-actor"><c:out value="${edit_actor}"/></a>
-										<a href="" data-actor="${actor.id}" data-error="${delete_actor_error}" data-success="${delete_actor_success}" class="btn btn-danger" id="delete-actor"><c:out value="${delete_actor}"/></a>
+									<div class="p-2">
+										<a href="#extra-actions-${actor.id}" data-toggle="collapse" aria-expanded="false" aria-controls="extra-actions" class="btn btn-link text-secondary" role="button"><c:out value="${extra_actions}"/> </a>
+										<div class="collapse" id="extra-actions">
+											<a href="actors/add-actor?translation=${actor.id}" class="btn btn-primary" role="button" id="add-actor-translation"><c:out value="${add_translation}"/></a>
+											<a href="actors/${actor.id}" class="btn btn-primary" role="button" id="edit-actor"><c:out value="${edit_actor}"/></a>
+											<a href="" data-actor="${actor.id}" data-error="${delete_actor_error}" data-success="${delete_actor_success}" class="btn btn-danger" id="delete-actor"><c:out value="${delete_actor}"/></a>
+										</div>
 									</div>
 								</c:if>
 							</li>		
@@ -75,13 +78,13 @@
 					</ul>
 				</c:when>
 				<c:otherwise>
-					<c:redirect url="${pageContext.request.contextPath}/actors"/>
+					<p><c:out value="${no_actors}"/></p>
 				</c:otherwise>
 			</c:choose>	
 			</div>
 			<c:if test="${sessionScope.user.role.toString() == 'ADMIN' }">
 				<div class="col-3" >
-					<a href="actors/add-actor" class="btn btn-secondary" role="button" id="add-actor-btn"><c:out value="${add_actor}"/> </a>
+					<a href="actors/add-actor" class="btn btn-secondary p-4" role="button" id="add-actor-btn"><c:out value="${add_actor}"/> </a>
 				</div>
 			</c:if>
 			<c:if test="${requestScope.pages > 1}">

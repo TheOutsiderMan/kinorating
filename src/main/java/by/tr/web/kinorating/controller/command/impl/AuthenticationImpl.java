@@ -20,6 +20,7 @@ import by.tr.web.kinorating.service.exception.ServiceException;
 public class AuthenticationImpl implements Command{
 	
 	private static final String PROBLEM_WITH_AUTHETICATION = "Problem with authetication";
+	
 	private static final String ATTR_USER = "user";
 	private static final String EMAIL_TRIGGER = "@";
 	private static final String EMPTY_STRING = "";

@@ -7,6 +7,7 @@ $(function() {
 		var success = $(this).attr("data-success");
 		var page = $(this).attr("data-page");
 		$.ajax({
+			async: false,
 			url : 'app',
 			type : 'post',
 			dataType: 'html',
@@ -15,7 +16,7 @@ $(function() {
 				login : user,
 				movieID : movie,
 				page : page
-			},
+			}
 		})
 	});
 

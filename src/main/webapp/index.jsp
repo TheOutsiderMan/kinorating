@@ -108,13 +108,21 @@
 											})
 										</script>
 										<div class="vote-container">
-											<h5 class="card-text text-secondary"><c:out value="${vote_rating}"/> <b><fmt:formatNumber maxFractionDigits="3" value="${movie.rating}"/></b></h5>
+											<h5 class="card-text text-secondary">
+												<c:out value="${vote_rating}"/>
+												<span id="rating-${movie.id}">
+													<b><fmt:formatNumber maxFractionDigits="3" value="${movie.rating}"/></b>
+												</span>
+											</h5>
 											<c:choose>
 												<c:when test="${user.marks.containsKey(movie.id)}">
 													<h5 class="card-text text-secondary user-vote">
-														<c:out value="${user_vote}"/> <span id="user-vote-${movie.id}" class="badge badge-info"><b><c:out value="${user.marks.get(movie.id)}"/></b></span>
+														<c:out value="${user_vote}"/>
+														<span id="user-vote-${movie.id}" class="badge badge-info" data-user-vote="${user.marks.get(movie.id)}">
+															<b><c:out value="${user.marks.get(movie.id)}"/></b>
+														</span>
 													</h5>
-													<a href="" data-user="${user.login}" data-movie="${movie.id}" data-error="${delete_vote_error}" data-success="${delete_vote_succes}" data-page="${pageContext.request.requestURL}" class="delete-movie btn btn-link btn-sm text-secondary"><c:out value="${delete_vote}"/></a>
+													<a href="" data-user="${user.login}" data-movie="${movie.id}" data-error="${delete_vote_error}" data-success="${delete_vote_succes}" data-page="${pageContext.request.requestURI}" class="delete-movie btn btn-link btn-sm text-secondary"><c:out value="${delete_vote}"/></a>
 												</c:when>
 												<c:otherwise>
 													<h6 class="card-text text-secondary" id="not-voted-${movie.id}">

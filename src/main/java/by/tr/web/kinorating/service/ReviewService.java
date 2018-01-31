@@ -9,13 +9,13 @@ public interface ReviewService {
 	
 	boolean addReview(String userLogin, int movieID, String text) throws ServiceException;
 	
-	List<Review> showAllReviews() throws ServiceException;
+	List<Review> showAllReviews(String langName) throws ServiceException;
 	
-	List<Review> getPartOfReviews(int start, int amount) throws ServiceException;
+	List<Review> getPartOfReviews(int start, int amount, String langName) throws ServiceException;
 	
 	int getReviewsAmount() throws ServiceException;
 	
-	List<Review> showUserReview(String login) throws ServiceException;
+	List<Review> showUserReviews(String login, String langName) throws ServiceException;
 	
 	List<Review> showMovieReviws(int movieID) throws ServiceException;
 	

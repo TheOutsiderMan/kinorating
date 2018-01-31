@@ -70,7 +70,7 @@ public class UserProfileInit implements Command {
 		ReviewService reviewService = factory.getReviewsService();
 		List<Review> reviews = null;
 		try {
-			reviews = reviewService.showUserReview(currentUser.getLogin());
+			reviews = reviewService.showUserReviews(currentUser.getLogin(), null);
 		} catch (ServiceException e) {
 			logger.error(PROBLEM_WITH_GETTING_USER_REVIEWS, e);
 		}

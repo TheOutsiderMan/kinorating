@@ -48,12 +48,12 @@ public class DeleteUserMarkImpl implements Command{
 		}
 		if (deleted) {
 			User user = (User) request.getSession().getAttribute(SESSION_ATTR_USER);
+			request.getSession().removeAttribute(SESSION_ATTR_USER);
 			user.getMarks().remove(movieID);
 			request.getSession().setAttribute(SESSION_ATTR_USER, user);
 			/*response.setStatus(HttpServletResponse.SC_OK);
 			response.setContentType(TEXT_HTML_CHARSET_UTF_8);*/
 			response.sendRedirect(redirectLocation);
-			return;
 		}
 	}
 	
